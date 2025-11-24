@@ -1,6 +1,6 @@
 # BillMate
-##Overview
+## Overview
 
-##Features
+## Features
 
-##Technologies
+## Technologies
