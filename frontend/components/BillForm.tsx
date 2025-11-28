@@ -48,15 +48,19 @@ export default function BillForm() {
     setLoading(true); //start creating form
 
     //create bill by inserting to db
-    const { error } = await supabase.from("bills").insert([
-      {
-        title,
-        total_amount: amount,
-        group_id: selectedGroup,
-        category,
-        payer_id: currentUser.id, //who uploaded/paid this bill
-      },
-    ]);
+    const { error } = await supabase
+      .from("bills")
+      .insert([
+        {
+          title,
+          total_amount: amount,
+          group_id: selectedGroup,
+          category,
+          payer_id: currentUser.id, //who uploaded/paid this bill
+        },
+      ])
+      .select()
+      .single(); //to get bill id of the inserted bill
     setLoading(false);
     if (error) {
       alert(error.message);
@@ -91,7 +95,8 @@ export default function BillForm() {
       >
         <option value="">Category (optional)</option>
         <option value={"utilities"}>Utilities</option>
-        <option value={"dining"}>Food</option>
+        <option value={"food"}>Food</option>
+        <option value={"rent"}>Rent</option>
       </select>
       <select
         className="border p-2"
