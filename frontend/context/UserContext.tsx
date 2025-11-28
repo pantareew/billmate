@@ -43,9 +43,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
       listener.subscription.unsubscribe();
     };
   }, []);
+  return (
+    <UserContext.Provider value={{ currentUser, setCurrentUser }}>
+      {children}
+    </UserContext.Provider>
+  );
 }
 
-//export reuse useContext
+//export custom hook to reuse useContext
 export function useUser() {
   const context = useContext(UserContext);
   if (!context) throw new Error("useUser must be used within a UserProvider");
