@@ -2,8 +2,18 @@
 
 import { useUser } from "@/context/UserContext";
 import { supabase } from "@/lib/supabaseClient";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+//function to generate random group's code
+function generateGroup(length = 8) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+  for (let i = 0; i < length; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
 
 export default function CreateGroupPage() {
   const [groupName, setGroupName] = useState("");
@@ -25,12 +35,13 @@ export default function CreateGroupPage() {
       return;
     }
     setLoading(true);
-
+    //get group's code
+    const code = generateGroup();
     const { data, error } = await supabase.from("groups").insert([
       {
         name: groupName,
         created_by: currentUser.id, //link to the logged-in user
-        created_at: new Date(),
+        code,
       },
     ]);
     setLoading(false);
