@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pydantic
+databases[postgresql]
+asyncpg
+python-multipart  # to upload receipt files
