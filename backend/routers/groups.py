@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
-from models import CreateGroup
+from models import CreateGroup, JoinGroup
 from database import supabase
 import string, random
 
@@ -23,6 +23,7 @@ def get_my_group(user_id: str = Query(...)):
     return {"groups": groups.data}
 #post
 @router.post("")
+#create group
 def create_group(payload: CreateGroup):
     try:
         code = generate_group_code() 
@@ -48,3 +49,21 @@ def create_group(payload: CreateGroup):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+#join group
+@router.post("/join")
+def join_group(payload:JoinGroup):
+    #get group by code
+    group = supabase.table("groups").select("*").eq("code",payload.code).single().execute()
+    if not group.data:
+        return {"error": "Group code not found"}
+    group_id = group.data["id"]
+    #check if user already in group
+    existing = supabase.table("group_members").select("*").eq("group_id",group_id).eq("user_id",payload.user_id).execute()
+    if existing.data:
+        return {"error":"User already in the group"}
+    #add user to the group
+    supabase.table("group_members").insert({
+        "user_id":payload.user_id, 
+        "group_id":group_id
+    }).execute()
+    return {"message": f"You are now in group '{group.data['name']}'!"}
