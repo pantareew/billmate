@@ -1,4 +1,13 @@
-from databases import Database
+from dotenv import load_dotenv
+import os
+from supabase import create_client
 
-DATABASE_URL = "postgresql://postgres:[YOUR_PASSWORD]@db.kfffvqtpwxedjarbkwkr.supabase.co:5432/postgres"
-database = Database(DATABASE_URL)
+load_dotenv()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+    raise ValueError("Missing Supabase env variables")
+
+supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
