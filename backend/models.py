@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from uuid import UUID
+from typing import List
 
 class CreateGroup(BaseModel):
     name: str
@@ -7,3 +9,11 @@ class CreateGroup(BaseModel):
 class JoinGroup(BaseModel):
     user_id: str #logged-in user that wanna join group
     code: str
+
+class CreateBill(BaseModel):
+    title: str #bill's title
+    payer_id: UUID #logged-in user that create bill
+    group_id: UUID
+    total_amount: float
+    category: str
+    shared_user_ids: List[UUID] #list of users who owe money
