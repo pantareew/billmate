@@ -30,7 +30,7 @@ def create_group(payload: CreateGroup):
         #insert new group into db
         group = supabase.table("groups").insert({
             "name": payload.name,
-            "created_by": payload.user_id,
+            "created_by": str(payload.user_id),
             "code": code
         }).execute()
 
@@ -43,7 +43,7 @@ def create_group(payload: CreateGroup):
         #insert group's creator into group_members
         supabase.table("group_members").insert({
             "group_id": group_id,
-            "user_id": payload.user_id
+            "user_id": str(payload.user_id)
         }).execute()
         return group.data[0] #return newly created group to frontend
     
@@ -58,12 +58,12 @@ def join_group(payload:JoinGroup):
         return {"error": "Group code not found"}
     group_id = group.data["id"]
     #check if user already in group
-    existing = supabase.table("group_members").select("*").eq("group_id",group_id).eq("user_id",payload.user_id).execute()
+    existing = supabase.table("group_members").select("*").eq("group_id",group_id).eq("user_id",str(payload.user_id)).execute()
     if existing.data:
         return {"error":"User already in the group"}
     #add user to the group
     supabase.table("group_members").insert({
-        "user_id":payload.user_id, 
+        "user_id":str(payload.user_id), 
         "group_id":group_id
     }).execute()
     return {"message": f"You are now in group '{group.data['name']}'!"}

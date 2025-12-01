@@ -4,10 +4,10 @@ from typing import List
 
 class CreateGroup(BaseModel):
     name: str
-    user_id: str #logged-in user that create group
+    user_id: UUID #logged-in user that create group
 
 class JoinGroup(BaseModel):
-    user_id: str #logged-in user that wanna join group
+    user_id: UUID #logged-in user that wanna join group
     code: str
 
 class CreateBill(BaseModel):
