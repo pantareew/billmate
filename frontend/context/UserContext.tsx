@@ -1,13 +1,7 @@
 "use client";
 
 import { supabase } from "@/lib/supabaseClient";
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 interface UserContextType {
   currentUser: any;
@@ -20,7 +14,7 @@ export const UserContext = createContext<UserContextType | undefined>(
 );
 
 //export Provider component
-export function UserProvider({ children }: { children: ReactNode }) {
+export function UserProvider({ children }: { children: React.ReactNode }) {
   //local state
   const [currentUser, setCurrentUser] = useState<any>(null);
 

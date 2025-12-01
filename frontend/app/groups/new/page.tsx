@@ -1,18 +1,20 @@
 "use client";
 
 import { useUser } from "@/context/UserContext";
-import { supabase } from "@/lib/supabaseClient";
+import { apiFetch } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 //function to generate random group's code
-function generateGroup(length = 8) {
+{
+  /*function generateGroup(length = 8) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let code = "";
   for (let i = 0; i < length; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return code;
+}*/
 }
 
 export default function CreateGroupPage() {
@@ -26,31 +28,58 @@ export default function CreateGroupPage() {
 
     //required field
     if (!groupName) {
-      alert("Please enter a group name.");
-      return;
+      return alert("Please enter a group name.");
     }
-    //ensure user is log
+    //ensure user is login
     if (!currentUser) {
-      alert("You must be logged in to create a group.");
-      return;
+      return alert("You must be logged in to create a group.");
     }
     setLoading(true);
-    //get group's code
-    const code = generateGroup();
-    const { data, error } = await supabase.from("groups").insert([
+    try {
+      //get group's code
+      //const code = generateGroup();
+      //create group
       {
-        name: groupName,
-        created_by: currentUser.id, //link to the logged-in user
-        code,
-      },
-    ]);
-    setLoading(false);
-    if (error) {
-      alert(`Error creating group: ${error.message}`);
-    } else {
+        /*const { data: group, error: groupError } = await supabase
+        .from("groups")
+        .insert([
+          {
+            name: groupName,
+            created_by: currentUser.id, //link to the logged-in user
+            code,
+          },
+        ])
+        .select()
+        .single();
+      if (groupError) throw groupError;
+      //add group's creator to the group
+      const { error: memberError } = await supabase
+        .from("group_members")
+        .insert([
+          {
+            group_id: group.id,
+            user_id: currentUser.id,
+          },
+        ]);
+      if (memberError) throw memberError;
       alert(`Group "${groupName}" created successfully!`);
       setGroupName(""); //reset create group form
+      router.push("/groups"); //go to groups page */
+      }
+      await apiFetch("/groups", {
+        method: "POST",
+        body: JSON.stringify({
+          name: groupName,
+          user_id: currentUser.id, //logged-in user
+        }),
+      });
+      alert("Group created!");
+      setGroupName("");
       router.push("/groups"); //go to groups page
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
   }
   return (

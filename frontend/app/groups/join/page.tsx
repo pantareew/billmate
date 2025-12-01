@@ -1,7 +1,8 @@
 "use client";
 
 import { useUser } from "@/context/UserContext";
-import { supabase } from "@/lib/supabaseClient";
+import { apiFetch } from "@/lib/api";
+import { group } from "console";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -17,6 +18,8 @@ export default function JoinGroupPage() {
     if (!groupCode) return alert("Please enter a group code.");
     setLoading(true);
     try {
+      {
+        /*
       //find group by code
       const { data: group, error: groupError } = await supabase
         .from("groups")
@@ -55,6 +58,18 @@ export default function JoinGroupPage() {
       //reset
       setGroupCode("");
       //redirect
+      router.push("/groups"); */
+      }
+      await apiFetch("/groups/join", {
+        method: "POST",
+        body: JSON.stringify({
+          code: groupCode,
+          user_id: currentUser.id,
+        }),
+      });
+      alert("Joined group!");
+      setGroupCode("");
+      setLoading(false);
       router.push("/groups");
     } catch (error) {
       console.error(error);

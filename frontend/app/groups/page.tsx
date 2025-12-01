@@ -1,8 +1,8 @@
 "use client";
 
 import { useUser } from "@/context/UserContext";
-import { supabase } from "@/lib/supabaseClient";
-
+import { apiFetch } from "@/lib/api";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 interface Group {
@@ -22,6 +22,8 @@ export default function GroupsPage() {
     if (!currentUser) return;
     async function fetchGroups() {
       setLoading(true);
+      {
+        /*
       const { data, error } = await supabase
         .from("group_members")
         .select(`group_id, groups(name, code)`) //get group's name and code from groups table through FK
@@ -35,8 +37,10 @@ export default function GroupsPage() {
           name: item.groups.name,
           code: item.groups.code,
         }));
-        setGroups(mappedGroups);
+        setGroups(mappedGroups);*/
       }
+      const data = await apiFetch<Group[]>(`/groups?user_id=${currentUser.id}`);
+      setGroups(data);
       setLoading(false);
     }
     fetchGroups();
@@ -45,19 +49,43 @@ export default function GroupsPage() {
   if (!currentUser) {
     return <p>Please login to see your groups.</p>;
   }
-  if (loading) {
-    return <p>Loading groups...</p>;
-  }
   return (
-    <div>
-      <h1>My Groups</h1>
-      <ul>
-        {groups.map((group) => (
-          <li key={group.id}>
-            {group.name} - <span>{group.code}</span>
-          </li>
-        ))}
-      </ul>
+    <div className="p-6">
+      <h1 className="text-xl font-bold mb-4">My Groups</h1>
+      <div className="flex gap-4 mb-6">
+        <Link
+          href="/groups/new"
+          className="bg-black text-white px-4 py-2 rounded"
+        >
+          Create Group
+        </Link>
+
+        <Link href="/groups/join" className="border px-4 py-2 rounded">
+          Join Group
+        </Link>
+      </div>
+      {/*loading groups */}
+      {loading && <p>Loading groups...</p>}
+      {/*no groups */}
+      {groups.length === 0 ? (
+        <p>You are not in any groups yet.</p>
+      ) : (
+        <ul className="space-y-3">
+          {groups.map((group) => (
+            <li
+              key={group.id}
+              className="border p-4 rounded flex justify-between"
+            >
+              <div>
+                <p className="font-semibold">{group.name}</p>
+                <p className="text-sm text-gray-500">
+                  Joining Code: {group.code}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
