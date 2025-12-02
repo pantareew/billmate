@@ -164,7 +164,7 @@ export default function BillForm() {
       setCategory("");
       setSelectedMembers([]);
       setGroupMembers([]);
-      router.push(`{/bills/${bill.id}}`); //navigate to the bill detail page
+      router.push("/dashboard"); //navigate to dashboard
     } catch (error: any) {
       console.error(error);
       alert(error.message || "Error creating bill");
