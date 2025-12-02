@@ -1,9 +1,10 @@
 "use client";
 
-import { supabase } from "@/lib/supabaseClient";
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { useUser } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 //group data type
 interface Group {
@@ -33,22 +34,34 @@ export default function BillForm() {
     if (!currentUser) return;
     //fetch user's groups
     async function fetchGroups() {
-      const { data, error } = await supabase
+      {
+        /*const { data, error } = await supabase
         .from("group_members")
         .select("group_id, groups(id, name)") //get id and name of each group
         .eq("user_id", currentUser.id);
       if (!error && data) {
         setGroups(data.map((item: any) => item.groups));
+      }*/
+      }
+      try {
+        const groups = await apiFetch<Group[]>(
+          `/groups?user_id=${currentUser.id}`
+        );
+        setGroups(groups);
+      } catch (error: any) {
+        console.error(error);
+        alert("Failed to load groups");
       }
     }
     fetchGroups();
   }, [currentUser]);
   //fetch members when group is selected
   useEffect(() => {
-    //check if group is selected
-    if (!selectedGroup) return;
+    //check for logged in user and selectedGroup
+    if (!currentUser || !selectedGroup) return;
     async function fetchMembers() {
-      const { data, error } = await supabase
+      {
+        /* const { data, error } = await supabase
         .from("group_members")
         .select("user_id, users(id,name)")
         .eq("group_id", selectedGroup);
@@ -56,6 +69,17 @@ export default function BillForm() {
         setGroupMembers(data.map((item: any) => item.users));
         //pre-select current user (payer/person who create the bill)
         setSelectedMembers([currentUser!.id]); //selectedMember array has currentUser included
+      }*/
+      }
+      try {
+        const members = await apiFetch<User[]>( //api returns array of users obj
+          `/groups/${selectedGroup}/members`
+        );
+        setGroupMembers(members.map((item: any) => item.users));
+        //pre-select current user (bill's payer)
+        setSelectedMembers([currentUser.id]);
+      } catch (error: any) {
+        console.error("Failed to fetch members:", error);
       }
     }
     fetchMembers();
@@ -85,7 +109,8 @@ export default function BillForm() {
 
     try {
       //inserting new bill to db
-      const { data: bill, error: billError } = await supabase
+      {
+        /*const { data: bill, error: billError } = await supabase
         .from("bills")
         .insert([
           {
@@ -116,7 +141,22 @@ export default function BillForm() {
         }))
       );
       if (shareError) throw shareError;
-      alert("Bill created successfully!");
+      alert("Bill created successfully!");*/
+      }
+      const bill = await apiFetch<{ id: string }>("/bills", {
+        //return created bill as string
+        method: "POST",
+        body: JSON.stringify({
+          title,
+          payer_id: currentUser.id,
+          group_id: selectedGroup,
+          total_amount: amount,
+          category,
+          shared_user_ids: selectedMembers.filter(
+            (id) => id !== currentUser.id //exclude payer
+          ),
+        }),
+      });
       //reset state variables
       setTitle("");
       setTotalAmount("");
@@ -165,6 +205,7 @@ export default function BillForm() {
         <option value={"utilities"}>Utilities</option>
         <option value={"food"}>Food</option>
         <option value={"rent"}>Rent</option>
+        <option value={"rent"}>Entertainment</option>
       </select>
       <select
         className="border p-2"
