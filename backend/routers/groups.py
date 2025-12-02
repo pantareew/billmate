@@ -8,7 +8,7 @@ router = APIRouter(prefix="/groups", tags=["Groups"])
 #generate group code
 def generate_group_code():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6)) #6 random chars of uppercase letters and digits 
-#get
+#get my groups
 @router.get("")
 def get_my_group(user_id: str = Query(...)):
     #fetch group id from group_members table where user belongs
@@ -20,7 +20,12 @@ def get_my_group(user_id: str = Query(...)):
         return {"groups": []}
     #get details of each group
     groups = supabase.table("groups").select("*").in_("id", group_ids).execute()
-    return {"groups": groups.data}
+    return groups.data
+#get group's members
+@router.get("/{group_id}/members")
+def get_group_members(group_id: str):
+    members = supabase.table("group_members").select("users(id,name)").eq("group_id", group_id).execute()
+    return members.data
 #post
 @router.post("")
 #create group

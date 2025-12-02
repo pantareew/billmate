@@ -1,7 +1,16 @@
 from fastapi import FastAPI
 from routers import groups, bills
-from database import supabase
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  #frontend
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 #include routes from groups
 app.include_router(groups.router)

@@ -4,6 +4,8 @@ from models import CreateBill
 
 router = APIRouter(prefix="/bills", tags=["Bills"])
 
+@router.get("")
+
 @router.post("")
 def create_bill(payload: CreateBill):
         #insert bill
@@ -34,5 +36,5 @@ def create_bill(payload: CreateBill):
             })
         #insert into db
         supabase.table("bill_shares").insert(share_rows).execute()
-        return bill.data[0]
+        return bill.data[0] #return newly created bill
     
