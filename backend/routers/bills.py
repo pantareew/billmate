@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException
 from database import supabase
 from models import CreateBill
 
@@ -6,7 +6,7 @@ router = APIRouter(prefix="/bills", tags=["Bills"])
 
 #get all my bills
 @router.get("")
-def get_bill(user_id: str=Query(...)):
+def get_my_bills(user_id: str):
       #bills that user paid
       paid_bills = supabase.table("bills").select("*").eq("payer_id", user_id).execute().data
      #bills that user owes
@@ -16,6 +16,20 @@ def get_bill(user_id: str=Query(...)):
       #combine bills
       all_bills = {bill["id"]: bill for bill in (paid_bills + owed_bills)}
       return list(all_bills.values())
+
+#get bill details
+@router.get("/{bill_id}")
+def get_bill_detail(bill_id: str):
+      #get the particular bill
+      bill = supabase.table("bills").select("*").eq("id", bill_id).single().execute().data
+      #get details of people that share this bill
+      shares = supabase.table("bill_shares").select("user_id,amount_owed,paid,receipt,paid_at").eq("bill_id",bill_id).execute().data
+      if not bill:
+            raise HTTPException(status_code=404, detail="Bill not found")
+      return{
+            "bill":bill,
+            "shares":shares
+      }
 #create new bill
 @router.post("")
 def create_bill(payload: CreateBill):
