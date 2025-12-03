@@ -1,11 +1,22 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from database import supabase
 from models import CreateBill
 
 router = APIRouter(prefix="/bills", tags=["Bills"])
 
+#get all my bills
 @router.get("")
-
+def get_bill(user_id: str=Query(...)):
+      #bills that user paid
+      paid_bills = supabase.table("bills").select("*").eq("payer_id", user_id).execute().data
+     #bills that user owes
+      owed = supabase.table("bill_shares").select("bill_id,bills(*)").eq("user_id", user_id).execute().data
+      #get only details from bills for owed bills
+      owed_bills = [item["bills"] for item in owed]
+      #combine bills
+      all_bills = {bill["id"]: bill for bill in (paid_bills + owed_bills)}
+      return list(all_bills.values())
+#create new bill
 @router.post("")
 def create_bill(payload: CreateBill):
         #insert bill

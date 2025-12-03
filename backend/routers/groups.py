@@ -24,7 +24,7 @@ def get_my_group(user_id: str = Query(...)):
 #get group's members
 @router.get("/{group_id}/members")
 def get_group_members(group_id: str):
-    members = supabase.table("group_members").select("users(id,name)").eq("group_id", group_id).execute()
+    members = supabase.table("group_members").select("user_id, users(id,name)").eq("group_id", group_id).execute()
     return members.data
 #post
 @router.post("")
