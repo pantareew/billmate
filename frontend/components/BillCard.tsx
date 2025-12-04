@@ -2,19 +2,20 @@
 
 import { useRouter } from "next/navigation";
 
+type Bill = {
+  id: string;
+  title: string;
+  group_name: string;
+  total_amount: number;
+  created_at: string;
+  payer_id: string;
+  payer_name: string;
+  total_owers: number; //amount of ppl who share the bill
+  paid_count: number; //amount of ppl who already paid
+  my_status?: "paid" | "unpaid" | "pending"; //ower status
+};
 type BillCardProps = {
-  bill: {
-    id: string;
-    title: string;
-    group_name: string;
-    total_amount: number;
-    created_at: string;
-    payer_id: string;
-    payer_name: string;
-    total_owers: number; //amount of ppl who share the bill
-    paid_count: number; //amount of ppl who already paid
-    my_status?: "paid" | "unpaid" | "pending"; //ower status
-  };
+  bill: Bill;
   currentUserId: string;
 };
 export default function BillCard({ bill, currentUserId }: BillCardProps) {

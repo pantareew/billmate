@@ -1,3 +1,65 @@
+"use client";
+import BillCard from "@/components/BillCard";
+import { useUser } from "@/context/UserContext";
+import { apiFetch } from "@/lib/api";
+import { useState, useEffect } from "react";
+
+type BillCardData = {
+  id: string;
+  title: string;
+  group_name: string;
+  total_amount: number;
+  created_at: string;
+  payer_id: string;
+  payer_name: string;
+  total_owers: number;
+  paid_count: number;
+  my_status: "paid" | "unpaid" | "pending";
+};
+
 export default function DashboardPage() {
-  return <div></div>;
+  const { currentUser } = useUser();
+  const [bills, setBills] = useState<BillCardData[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (!currentUser) return;
+
+    async function loadDashboard() {
+      try {
+        const data = await apiFetch<any>(`/bills?user_id=${currentUser.id}`);
+        console.log("DASHBOARD API RESPONSE:", data);
+        setBills(data.bills);
+      } catch (err: any) {
+        alert(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboard();
+  }, [currentUser]);
+  if (!currentUser) return <p>Please log in</p>;
+  if (loading) return <p>Loading dashboard...</p>;
+  return (
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      {/* recent bills */}
+      <div>
+        <h2 className="text-lg font-bold mb-3">Recent Bills</h2>
+
+        {bills.length === 0 ? (
+          <p className="text-sm text-gray-500">No bills found</p>
+        ) : (
+          <div className="space-y-3">
+            {bills.map((bill) => (
+              <BillCard
+                key={bill.id}
+                bill={bill}
+                currentUserId={currentUser.id}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
