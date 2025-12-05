@@ -104,7 +104,7 @@ def approve_receipt(bill_id: str, user_id: str):
      result = supabase.table("bill_shares").update({"paid": "paid"}).eq("bill_id",bill_id).eq("user_id",user_id).execute()
      if not result.data:
         raise HTTPException(status_code=400, detail="Approval failed")
-     return result
+     return result.data
 
 #pay for bill share
 @router.post("/{bill_id}/pay")
@@ -115,4 +115,4 @@ def pay_bill(bill_id:str, payload:dict): #payload: {user_id:str, receipt:str}
           raise HTTPException(status_code=400, detail="Missing user_id or receipt")
      #update bill_shares with receipt and paid_at then mark as pending
      result = supabase.table("bill_shares").update({"receipt":receipt, "paid":"pending","paid_at":"NOW()"}).eq("bill_id",bill_id).eq("user_id",user_id).execute()
-     return result
+     return result.data
