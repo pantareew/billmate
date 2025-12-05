@@ -4,6 +4,15 @@ import { useUser } from "@/context/UserContext";
 import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 
+type BillShare = {
+  user_id: string;
+  user_name: string;
+  amount_owed: number;
+  paid: "paid" | "unpaid" | "pending";
+  paid_at: string | null;
+  receipt: string | null;
+};
+
 type BillCardData = {
   id: string;
   title: string;
@@ -12,22 +21,24 @@ type BillCardData = {
   created_at: string;
   payer_id: string;
   payer_name: string;
-  total_owers: number;
-  paid_count: number;
-  my_status: "paid" | "unpaid" | "pending";
+  my_status?: "paid" | "unpaid" | "pending"; //ower status
+  shares?: BillShare[]; //for payer to view owers
 };
 
 export default function DashboardPage() {
   const { currentUser } = useUser();
   const [bills, setBills] = useState<BillCardData[]>([]);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     if (!currentUser) return;
 
     async function loadDashboard() {
       try {
-        const data = await apiFetch<any>(`/bills?user_id=${currentUser.id}`);
-        console.log("DASHBOARD API RESPONSE:", data);
+        //call backend
+        const data = await apiFetch<{ bills: BillCardData[] }>(
+          `/bills?user_id=${currentUser.id}`
+        );
         setBills(data.bills);
       } catch (err: any) {
         alert(err.message);
@@ -35,7 +46,6 @@ export default function DashboardPage() {
         setLoading(false);
       }
     }
-
     loadDashboard();
   }, [currentUser]);
   if (!currentUser) return <p>Please log in</p>;
