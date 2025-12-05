@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 from database import supabase
 from models import CreateBill
 
@@ -6,7 +6,7 @@ router = APIRouter(prefix="/bills", tags=["Bills"])
 
 #get all my bills
 @router.get("")
-def get_my_bills(user_id: str = Query(...)):
+def get_my_bills(user_id: str):
     #bills that user paid
     payer_bills_raw = supabase.table("bills").select("*").eq("payer_id", user_id).execute().data
     payer_bills = []   
@@ -61,19 +61,6 @@ def get_my_bills(user_id: str = Query(...)):
     all_bills = payer_bills + owed_bills
     return {"bills":all_bills}
 
-#get bill details
-#@router.get("/{bill_id}")
-#def get_bill_detail(bill_id: str):
-      #get the particular bill
-      #bill = supabase.table("bills").select("*").eq("id", bill_id).single().execute().data
-      #get details of people that share this bill
-      #shares = supabase.table("bill_shares").select("user_id,amount_owed,paid,receipt,paid_at").eq("bill_id",bill_id).execute().data
-      #if not bill:
-            #raise HTTPException(status_code=404, detail="Bill not found")
-      #return{
-            #"bill":bill,
-            #"shares":shares
-      #}
 #create new bill
 @router.post("")
 def create_bill(payload: CreateBill):
@@ -106,4 +93,26 @@ def create_bill(payload: CreateBill):
         #insert into db
         supabase.table("bill_shares").insert(share_rows).execute()
         return bill.data[0] #return newly created bill
-    
+
+#approve payment for a specific user
+@router.post("/{bill_id}/approve")
+def approve_receipt(bill_id: str, user_id: str):
+     #no user passed in for approval
+     if not user_id:
+        raise HTTPException(status_code=400, detail="Missing user_id")
+     #update bill_shares by marking paid
+     result = supabase.table("bill_shares").update({"paid": "paid"}).eq("bill_id",bill_id).eq("user_id",user_id).execute()
+     if not result.data:
+        raise HTTPException(status_code=400, detail="Approval failed")
+     return result
+
+#pay for bill share
+@router.post("/{bill_id}/pay")
+def pay_bill(bill_id:str, payload:dict): #payload: {user_id:str, receipt:str}
+     user_id = payload.get("user_id")
+     receipt = payload.get("receipt")
+     if not user_id or not receipt:
+          raise HTTPException(status_code=400, detail="Missing user_id or receipt")
+     #update bill_shares with receipt and paid_at then mark as pending
+     result = supabase.table("bill_shares").update({"receipt":receipt, "paid":"pending","paid_at":"NOW()"}).eq("bill_id",bill_id).eq("user_id",user_id).execute()
+     return result
