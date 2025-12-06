@@ -17,3 +17,6 @@ class CreateBill(BaseModel):
     total_amount: float
     category: str
     shared_user_ids: List[UUID] #list of users who owe money
+
+class ApproveRequest(BaseModel): #return from payer's approval
+    user_id: str
