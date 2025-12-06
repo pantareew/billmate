@@ -27,6 +27,8 @@ type BillCardProps = {
 export default function BillCard({ bill, currentUserId }: BillCardProps) {
   const [shares, setShares] = useState<Share[]>(bill.shares || []);
   const [myStatus, setMyStatus] = useState(bill.my_status || "unpaid"); //currentUser status for owing bill
+  const [showUpload, setShowUpload] = useState(false);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const isPayer = bill.payer_id === currentUserId; //check if currentUser is payer of the bill
   //approve receipt as a payer
   const handleApproveReceipt = async (share: Share) => {
@@ -50,17 +52,35 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
     }
   };
   //upload receipt as an ower to pay share
-  const handlePayNow = async () => {
+  const handleUploadReceipt = async () => {
+    //check for receipt file
+    if (!receiptFile) {
+      alert("Please upload receipt");
+      return;
+    }
+    //create form data to send to backend
+    const formData = new FormData();
+    formData.append("file", receiptFile); //actual receipt file
+    formData.append("user_id", currentUserId); //user id of current user
     //upload receipt then mark as pending
     try {
-      const res = await apiFetch<{ paid: "pending" }>(`/bills/${bill.id}/pay`, {
-        method: "POST",
-        body: JSON.stringify({ user_id: currentUserId, receipt: "dummy_url" }),
-      });
+      const res = await apiFetch<{ paid: "pending"; receipt_url: string }>(
+        `/bills/${bill.id}/upload_receipt`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
       setMyStatus(res.paid);
+      closeUpload();
     } catch (err: any) {
       alert(err.message);
     }
+  };
+  //close upload popup
+  const closeUpload = () => {
+    setShowUpload(false); // close modal
+    setReceiptFile(null); // reset selected file
   };
   return (
     <div className="border p-4 rounded-md shadow-sm">
@@ -124,11 +144,67 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
       {!isPayer && myStatus === "unpaid" && (
         <div className="mt-3">
           <button
-            className="bg-blue-600 text-white px-3 py-1 rounded"
-            onClick={handlePayNow}
+            className="bg-blue-600 text-white px-3 py-1 rounded cursor-pointer"
+            onClick={() => setShowUpload(true)}
           >
             Pay Now
           </button>
+        </div>
+      )}
+      {/*show popup to upload receipt */}
+      {showUpload && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-cyan-500 w-[400px] rounded-xl p-5 shadow-lg relative">
+            {/*title */}
+            <h2 className="text-lg font-semibold text-center mb-4">
+              Upload Receipt
+            </h2>
+            {/*upload box */}
+            <label
+              htmlFor="receipt-upload"
+              className="border-2 border-dashed border-gray-300 rounded-lg h-52 flex flex-col items-center justify-center cursor-pointer"
+            >
+              {/*show uploaded file if exists */}
+              {receiptFile ? (
+                <img
+                  src={URL.createObjectURL(receiptFile)}
+                  alt="Receipt preview"
+                  className="max-h-48 object-contain rounded-md"
+                />
+              ) : (
+                <>
+                  <span className="text-3xl mb-2">📸</span>
+                  <p className="text-sm text-gray-500">
+                    Click to upload receipt
+                  </p>
+                </>
+              )}
+            </label>
+            {/*upload file */}
+            <input
+              id="receipt-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => setReceiptFile(e.target.files?.[0] ?? null)} //file is File or null
+            />
+            {/*action button */}
+            <div className="flex justify-end mt-4 gap-2">
+              <button
+                onClick={closeUpload}
+                className="px-4 py-2 rounded-md bg-red-400 text-sm cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleUploadReceipt}
+                className="px-4 py-2 rounded-md bg-black text-white text-sm disabled:opacity-50 cursor-pointer"
+              >
+                Upload Receipt
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

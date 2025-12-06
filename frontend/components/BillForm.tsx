@@ -223,7 +223,7 @@ export default function BillForm() {
       </select>
       {groupMembers.length > 0 && (
         <div className="flex flex-col gap-1">
-          <p>Select members sharing this bill:</p>
+          <p>Split Among:</p>
           {groupMembers.map((member) => (
             <label key={member.id} className="flex items-center gap-2">
               <input

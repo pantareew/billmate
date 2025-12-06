@@ -5,9 +5,6 @@ export async function apiFetch<T>(
   options?: RequestInit //method, boady, header
 ): Promise<T> {
   const res = await fetch(`${BASE_URL}${endpoint}`, { //fetch call
-    headers: {
-      "Content-Type": "application/json",
-    },
     ...options,
   });
   //api errors
