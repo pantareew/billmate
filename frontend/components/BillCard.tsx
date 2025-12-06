@@ -8,6 +8,7 @@ type Share = {
   user_name: string;
   amount_owed: number;
   paid: "paid" | "unpaid" | "pending"; //shares can only have one of these status
+  receipt?: string;
 };
 
 type BillCardProps = {
@@ -27,21 +28,28 @@ type BillCardProps = {
 export default function BillCard({ bill, currentUserId }: BillCardProps) {
   const [shares, setShares] = useState<Share[]>(bill.shares || []);
   const [myStatus, setMyStatus] = useState(bill.my_status || "unpaid"); //currentUser status for owing bill
+  //receipt as ower
   const [showUpload, setShowUpload] = useState(false);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  //receipt as approver(payer)
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [selectedShare, setSelectedShare] = useState<Share | null>(null);
   const isPayer = bill.payer_id === currentUserId; //check if currentUser is payer of the bill
   //approve receipt as a payer
   const handleApproveReceipt = async (share: Share) => {
     //call backend to mark paid for this share
     try {
-      const res = await apiFetch<{ paid: "paid" | "unpaid" | "pending" }>(
+      const res = await apiFetch<{ paid: "paid" }>(
         `/bills/${bill.id}/approve`,
         {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({ user_id: share.user_id }),
         }
       );
-      //update UI
+      //update status for UI
       setShares((prev) =>
         prev.map((s) =>
           s.user_id === share.user_id ? { ...s, paid: res.paid } : s
@@ -117,7 +125,7 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
           )}
         </div>
       </div>
-
+      {/*show approve option for pending shares */}
       {isPayer && shares.length > 0 && (
         <div className="mt-3">
           <ul className="space-y-1">
@@ -130,7 +138,12 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
                 {s.paid === "pending" && (
                   <button
                     className="text-blue-600 text-sm underline"
-                    onClick={() => handleApproveReceipt(s)}
+                    onClick={() => {
+                      console.log("Selected share:", s);
+                      console.log("Receipt URL:", s.receipt);
+                      setSelectedShare(s); //update share user
+                      setShowReceipt(true); //show receipt popup
+                    }}
                   >
                     Approve
                   </button>
@@ -138,6 +151,40 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
               </li>
             ))}
           </ul>
+        </div>
+      )}
+      {/*show receipt popup for approval */}
+      {showReceipt && selectedShare && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-cyan-500 p-4 rounded-md max-w-md w-full relative">
+            <h3 className="text-lg font-semibold text-center mb-4">
+              Receipt from {selectedShare.user_name}
+            </h3>
+            <div className="border-2 border-dashed border-gray-300 p-4 flex flex-col items-center">
+              <img
+                src={selectedShare.receipt}
+                alt="Receipt"
+                className="max-h-96 object-contain mb-4"
+              />
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                className="ml-2 bg-red-300 px-3 py-1 rounded mx-3 cursor-pointer"
+                onClick={() => setShowReceipt(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-green-600 text-white px-3 py-1 rounded cursor-pointer"
+                onClick={async () => {
+                  await handleApproveReceipt(selectedShare);
+                  setShowReceipt(false);
+                }}
+              >
+                Approve
+              </button>
+            </div>
+          </div>
         </div>
       )}
       {/*show Pay now button for ower bill */}

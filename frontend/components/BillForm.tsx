@@ -146,6 +146,9 @@ export default function BillForm() {
       const bill = await apiFetch<{ id: string }>("/bills", {
         //return created bill as string
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           title,
           payer_id: currentUser.id,
