@@ -71,7 +71,7 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
           body: formData,
         }
       );
-      setMyStatus(res.paid);
+      setMyStatus(res.paid); //set payment status for frontend
       closeUpload();
     } catch (err: any) {
       alert(err.message);

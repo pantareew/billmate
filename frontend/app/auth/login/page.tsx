@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   //set state variables and functions
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
   //handle login
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -19,7 +21,7 @@ export default function LoginPage() {
     //credentials are correct
     else {
       localStorage.setItem("token", data.session?.access_token!);
-      alert("Logged in!");
+      router.push("/dashboard");
     }
   }
 
