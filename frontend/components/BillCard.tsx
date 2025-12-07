@@ -17,6 +17,7 @@ type BillCardProps = {
     title: string;
     group_name: string;
     total_amount: number;
+    amount_owed: number;
     created_at: string;
     payer_id: string;
     payer_name: string;
@@ -119,8 +120,12 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
                   : "text-red-600"
               }`}
             >
+              {/*showing how much currentUser owed in ower bill */}
+              <p className="text-sm text-gray-600 mt-1">
+                ${bill.amount_owed.toFixed(2)} per person
+              </p>
               {/*show my status as an ower */}
-              {myStatus.toUpperCase()}
+              <p>{myStatus.toUpperCase()}</p>
             </p>
           )}
         </div>
@@ -132,7 +137,8 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
             {shares.map((s) => (
               <li key={s.user_id} className="flex justify-between items-center">
                 <span>
-                  {s.user_name}: {s.paid} {/*show shares status */}
+                  {s.user_name}: ${s.amount_owed.toFixed(2)} - {s.paid}{" "}
+                  {/*show shares status */}
                 </span>
                 {/*approve pending status */}
                 {s.paid === "pending" && (

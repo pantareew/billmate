@@ -67,7 +67,7 @@ export default function GroupsPage() {
       {/*loading groups */}
       {loading && <p>Loading groups...</p>}
       {/*no groups */}
-      {groups.length === 0 ? (
+      {!loading && groups.length === 0 ? (
         <p>You are not in any groups yet.</p>
       ) : (
         <ul className="space-y-3">
