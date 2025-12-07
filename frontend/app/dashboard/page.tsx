@@ -1,5 +1,6 @@
 "use client";
 import BillCard from "@/components/BillCard";
+import DashboardChart from "@/components/DashboardChart";
 import { useUser } from "@/context/UserContext";
 import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
@@ -21,6 +22,7 @@ type BillCardData = {
   created_at: string;
   payer_id: string;
   payer_name: string;
+  amount_owed: number;
   my_status?: "paid" | "unpaid" | "pending"; //ower status
   shares?: BillShare[]; //for payer to view owers
 };
@@ -52,6 +54,7 @@ export default function DashboardPage() {
   if (loading) return <p>Loading dashboard...</p>;
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <DashboardChart />
       {/* recent bills */}
       <div>
         <h2 className="text-lg font-bold mb-3">Recent Bills</h2>

@@ -1,6 +1,7 @@
 "use client";
 
 import { apiFetch } from "@/lib/api";
+import { Camera } from "lucide-react";
 import { useState } from "react";
 
 type Share = {
@@ -111,22 +112,24 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
               paid
             </p>
           ) : (
-            <p
-              className={`text-sm font-medium ${
-                myStatus === "paid"
-                  ? "text-green-600"
-                  : myStatus === "pending"
-                  ? "text-yellow-600"
-                  : "text-red-600"
-              }`}
-            >
+            <div>
               {/*showing how much currentUser owed in ower bill */}
               <p className="text-sm text-gray-600 mt-1">
                 ${bill.amount_owed.toFixed(2)} per person
               </p>
-              {/*show my status as an ower */}
-              <p>{myStatus.toUpperCase()}</p>
-            </p>
+              <p
+                className={`text-sm font-medium ${
+                  myStatus === "paid"
+                    ? "text-green-600"
+                    : myStatus === "pending"
+                    ? "text-yellow-600"
+                    : "text-red-600"
+                }`}
+              >
+                {/*show my status as an ower */}
+                {myStatus.toUpperCase()}
+              </p>
+            </div>
           )}
         </div>
       </div>
@@ -226,8 +229,8 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
                 />
               ) : (
                 <>
-                  <span className="text-3xl mb-2">📸</span>
-                  <p className="text-sm text-gray-500">
+                  <Camera size={28} />
+                  <p className="text-sm text-gray-100 my-3">
                     Click to upload receipt
                   </p>
                 </>

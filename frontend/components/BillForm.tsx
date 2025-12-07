@@ -45,7 +45,12 @@ export default function BillForm() {
       }
       try {
         const groups = await apiFetch<Group[]>(
-          `/groups?user_id=${currentUser.id}`
+          `/groups?user_id=${currentUser.id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
         );
         setGroups(groups);
       } catch (error: any) {
