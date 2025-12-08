@@ -2,18 +2,16 @@
 
 import BillForm from "@/components/BillForm";
 import { useUser } from "@/context/UserContext";
-import { useRouter } from "next/navigation";
 import { useState, ChangeEvent, useEffect } from "react";
-import { Camera } from "lucide-react";
+import { Camera, Loader, CircleCheckBig } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 
 export default function NewBillPage() {
   const { currentUser } = useUser();
-  const router = useRouter();
   const [file, setFile] = useState<File | null>(null); //temporary store uploaded file
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"manual" | "upload">("upload"); //toggling between two modes: upload bill and create bill manually
-
+  const [aiResult, setAiResult] = useState<any>(null);
   //const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
   //if (!e.target.files || e.target.files.length === 0) return;
   //const selectedFile = e.target.files[0];
@@ -32,14 +30,15 @@ export default function NewBillPage() {
         formData.append("user_id", currentUser.id);
 
         //call backend to upload receipt file to storage
-        const data = await apiFetch<{ bill_id: string; receipt: string }>(
-          "/bills/upload",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
+        const data = await apiFetch<{
+          bill_id: string;
+          total_amount: number;
+          title: string;
+        }>("/bills/upload", {
+          method: "POST",
+          body: formData,
+        });
+        setAiResult(data);
         console.log("bill uploaded: ", data);
       } catch (err: any) {
         alert(err.message);
@@ -72,7 +71,7 @@ export default function NewBillPage() {
             className="border-2 border-dashed border-gray-400 p-20 flex flex-col items-center justify-center cursor-pointer mb-6"
             onClick={() => document.getElementById("fileInput")?.click()}
           >
-            {/*preview the selected file or ask user to upload the file*/}
+            {/*preview the selected file or upload the file*/}
             {file ? (
               <img
                 src={URL.createObjectURL(file)}
@@ -86,9 +85,14 @@ export default function NewBillPage() {
                   Click to upload receipt
                 </p>
                 <p className="text-gray-500">
-                  Only accept image file type (PNG, JPG)
+                  Only accept image file type (PNG, JPG, JPEG)
                 </p>
               </div>
+            )}
+            {loading && (
+              <p className="text-amber-700 flex items-center gap-2">
+                <Loader size={25} /> Processing with Open AI
+              </p>
             )}
           </div>
           <input
@@ -98,6 +102,21 @@ export default function NewBillPage() {
             className="hidden"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
           />
+          {/*show data from AI */}
+          <div className="bg-orange-100 border border-orange-300 rounded-xl p-4 mt-4">
+            <div className="text-amber-700 flex items-center gap-2 mb-2 font-semibold">
+              <CircleCheckBig size={25} />
+              <h3>Receipt Extracted</h3>
+            </div>
+            <p className="text-orange-900 flex justify-between">
+              <span className="font-medium">Merchant: </span>
+              <span>{aiResult.title}</span>
+            </p>
+            <p className="text-orange-900 flex justify-between">
+              <span className="font-medium">Total: </span>
+              <span>${aiResult.total_amount}</span>
+            </p>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
