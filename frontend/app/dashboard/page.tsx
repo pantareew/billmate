@@ -10,8 +10,8 @@ type BillShare = {
   user_name: string;
   amount_owed: number;
   paid: "paid" | "unpaid" | "pending";
-  paid_at: string | null;
-  receipt: string | null;
+  paid_at: string;
+  receipt: string;
 };
 
 type BillCardData = {
