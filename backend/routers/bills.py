@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException, File, UploadFile
+from fastapi import APIRouter, HTTPException, File, UploadFile, Form
 from database import supabase
 from models import CreateBill, ApproveRequest
+from datetime import datetime
+import uuid
 
 router = APIRouter(prefix="/bills", tags=["Bills"])
 
@@ -17,7 +19,7 @@ def get_my_bills(user_id: str):
         #get payer name
         payer = supabase.table("users").select("name").eq("id", bill["payer_id"]).single().execute().data
         #get bill shares for this bill
-        shares = supabase.table("bill_shares").select("user_id, amount_owed, paid").eq("bill_id", bill["id"]).execute().data
+        shares = supabase.table("bill_shares").select("user_id, amount_owed, paid, receipt").eq("bill_id", bill["id"]).execute().data
         #map shares to include user names
         shares_detail = []
         for share in shares:
@@ -27,7 +29,8 @@ def get_my_bills(user_id: str):
                 "user_id": share["user_id"],
                 "user_name": user["name"],
                 "amount_owed": share["amount_owed"],
-                "paid": share["paid"]
+                "paid": share["paid"],
+                "receipt":share["receipt"]
             })
         #include all data to return
         payer_bills.append({
@@ -41,7 +44,7 @@ def get_my_bills(user_id: str):
             "shares": shares_detail
         })
     #bills that user owes
-    owed_raw = supabase.table("bill_shares").select("bill_id, paid").eq("user_id", user_id).execute().data
+    owed_raw = supabase.table("bill_shares").select("bill_id, paid, amount_owed").eq("user_id", user_id).execute().data
     owed_bills = []
     for item in owed_raw:
          bill = supabase.table("bills").select("*").eq("id", item["bill_id"]).single().execute().data
@@ -55,12 +58,34 @@ def get_my_bills(user_id: str):
             "created_at": bill["created_at"],
             "payer_id": bill["payer_id"],
             "payer_name": payer["name"],
-            "my_status": item["paid"]
+            "my_status": item["paid"],
+            "amount_owed":item["amount_owed"]
         })
     #combined payer bills and ower bills
     all_bills = payer_bills + owed_bills
     return {"bills":all_bills}
+#get total amount that user owes and others owe user
+@router.get("/summary")
+def get_bill_summary(user_id: str):
+    
+    #amount user owes
+    my_unpaid = supabase.table("bill_shares").select("amount_owed").eq("user_id",user_id).in_("paid",["unpaid","pending"]).execute()
+    #get total amount user owes
+    you_owe = sum(item["amount_owed"] for item in my_unpaid.data)
 
+    #amount others owe
+    my_bills = supabase.table("bills").select("id").eq("payer_id", user_id).execute() #get all bills that user paid
+    bill_ids = [bill["id"] for bill in my_bills.data] #extract only ids
+    #check if user paid any bills
+    if bill_ids:
+        #get amount that shares owe
+        others_unpaid = supabase.table("bill_shares").select("amount_owed").in_("bill_id", bill_ids).in_("paid",["unpaid","pending"]).execute()
+        #get total amount owed to the user
+        owed_you = sum(item["amount_owed"] for item in others_unpaid.data)
+    else:
+        owed_you = 0
+    return {"you_owe": you_owe, "owed_you":owed_you
+            }
 #create new bill
 @router.post("")
 def create_bill(payload: CreateBill):
@@ -97,8 +122,8 @@ def create_bill(payload: CreateBill):
 #approve payment for a specific user
 @router.post("/{bill_id}/approve")
 def approve_receipt(bill_id: str, payload: ApproveRequest):
-     #get user_id
-     user_id = payload.user_id
+     #get user_id from body request
+     user_id = payload.user_id 
      #no user passed in for approval
      if not user_id:
         raise HTTPException(status_code=400, detail="Missing user_id")
@@ -119,18 +144,60 @@ def approve_receipt(bill_id: str, payload: ApproveRequest):
      #result = supabase.table("bill_shares").update({"receipt":receipt, "paid":"pending","paid_at":"NOW()"}).eq("bill_id",bill_id).eq("user_id",user_id).execute()
      #return result.data[0]
 
-#upload rceipt
+#upload rceipt for ower
 @router.post("/{bill_id}/upload_receipt")
-async def upload_receipt(bill_id: str, user_id: str, file: UploadFile = File(...)):
-     file_path = f"{bill_id}/{user_id}/{file.filename}"
-     #convert uploaded file into binary
-     contents = await file.read()
-     #upload file to storage
-     res = supabase.storage.from_("receipts").upload(file_path, contents, {"upsert":True})
-     if not res:
-        raise HTTPException(status_code=400, detail="Upload failed")
-     #get file url
-     receipt_url = supabase.storage.from_("receipts").get_public_url(file_path)
-     #update bill_shares with receipt url
-     supabase.table("bill_shares").update({"receipt":receipt_url, "paid_at":"NOW()", "paid":"pending"}).eq("bill_id",bill_id).eq("user_id",user_id).execute()
-     return {"receipt_url":receipt_url}
+async def upload_receipt(bill_id: str, 
+                         user_id: str = Form(...), #user_id comes from FormData 
+                         file: UploadFile = File(...)): #actual receipt file
+     print(f"Received: bill_id={bill_id}, user_id={user_id}, file={file.filename}")
+     if not user_id or not file:
+        raise HTTPException(status_code=400, detail="Missing user_id or file")
+     try: 
+        #convert uploaded file into binary
+        contents = await file.read()
+        file_path = f"{bill_id}/{user_id}/{file.filename}"
+        #upload file to storage
+        supabase.storage.from_("receipts").upload(file_path, contents, file_options={ "content-type": file.content_type,
+        "upsert": "true"})
+        #get file url
+        receipt_url = supabase.storage.from_("receipts").get_public_url(file_path)
+        #update bill_shares with receipt url
+        supabase.table("bill_shares").update({"receipt":receipt_url, "paid_at":datetime.now().isoformat(), "paid":"pending"}).eq("bill_id",bill_id).eq("user_id",user_id).execute()
+        return {"paid":"pending","receipt_url":receipt_url}
+     except Exception as e:
+        print("Error uploading receipt:", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+#upload main bill
+@router.post("/upload")
+def upload_main_bill(
+    receipt: UploadFile = File(...), #receipt file
+    user_id: str = Form(...)
+):
+    #get file externsion
+    file__ext = receipt.filename.split(".")[-1]
+    #create unique filename
+    file_name = f"{uuid.uuid4()}.{file__ext}"
+    #file path
+    file_path = f"bills/{file_name}"
+    #convert file to binary
+    contents = receipt.file.read()
+    #upload to storage
+    supabase.storage.from_("receipts").upload(file_path, contents, {"content-type": receipt.content_type})
+    #get public url
+    public_url = supabase.storage.from_("receipts").get_public_url(file_path)
+    #insert into bills table
+    bill = supabase.table("bills").insert({
+        "title": "Draft bill", #will updated by AI later
+        "total_amount": 0, #will updated by AI later
+        "payer_id": user_id,
+        "group_id": None, #user will update later
+        "created_at": datetime.utcnow().isoformat(),
+        "receipt": public_url
+    }).execute()
+    #get bill id
+    bill_id = bill.data[0]["id"]
+    return {
+        "bill_id": bill_id,
+        "receipt": public_url
+    }
