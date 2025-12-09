@@ -2,16 +2,24 @@
 
 import { useUser } from "@/context/UserContext";
 import { Bell, LogOut } from "lucide-react";
+import NotificationsDropdown from "./NotificationsDropdown";
+import { useState } from "react";
 
 export default function NavBar() {
   const { currentUser, logout } = useUser();
+  const [showNoti, setShowNoti] = useState(false);
   return (
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         <h1 className="text-xl font-bold text-gray-800">BillMate</h1>
         {currentUser && (
           <div className="inline-flex items-center">
-            <Bell className="text-amber-800 cursor-pointer mx-2" size={25} />
+            <Bell
+              className="text-amber-800 cursor-pointer mx-2"
+              size={25}
+              onClick={() => setShowNoti((prev) => !prev)}
+            />
+            {showNoti && <NotificationsDropdown />}
             <button
               onClick={logout}
               className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
