@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import groups, bills
+from routers import groups, bills, notifications
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -18,6 +18,9 @@ app.include_router(groups.router)
 
 #include routes from bills
 app.include_router(bills.router)
+
+#include routes from notifications
+app.include_router(notifications.router)
 
 @app.get("/")
 def root():

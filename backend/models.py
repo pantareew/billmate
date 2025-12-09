@@ -20,3 +20,10 @@ class CreateBill(BaseModel):
 
 class ApproveRequest(BaseModel): #return from payer's approval
     user_id: str
+
+class SplitBill(BaseModel):
+    bill_id: str
+    group_id: str
+    total_amount: float
+    shared_users: List[str]
+    title: str

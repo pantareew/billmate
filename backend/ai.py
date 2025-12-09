@@ -17,7 +17,7 @@ def extract_receipt(receipt_url: str):
             "role":"user",
             "content":[
                 {"type":"text", "text": "Extract merchant name and total amount from this receipt "},#text prompt
-                {"type":"receipt_url", "receipt_url": {"url":receipt_url}},#receipt to read
+                {"type":"image_url", "image_url": {"url":receipt_url}},#receipt to read
             ],
         }
         ],

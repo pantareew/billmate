@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile, Form
 from database import supabase
-from models import CreateBill, ApproveRequest
-from datetime import datetime
+from models import CreateBill, ApproveRequest, SplitBill
+from datetime import datetime, timezone
 import uuid
+from ai import extract_receipt
 
 router = APIRouter(prefix="/bills", tags=["Bills"])
 
@@ -50,7 +51,7 @@ def get_my_bills(user_id: str):
          bill = supabase.table("bills").select("*").eq("id", item["bill_id"]).single().execute().data
          group = supabase.table("groups").select("name").eq("id", bill["group_id"]).single().execute().data
          payer = supabase.table("users").select("name").eq("id", bill["payer_id"]).single().execute().data
-    owed_bills.append({
+         owed_bills.append({
             "id": bill["id"],
             "title": bill["title"],
             "group_name": group["name"],
@@ -111,7 +112,7 @@ def create_bill(payload: CreateBill):
                 "bill_id":bill_id,
                 "user_id":str(user_id),
                 "amount_owed":split_amount,
-                "paid": False,
+                "paid": "unpaid",
                 "receipt": None,
                 "paid_at": None
             })
@@ -162,7 +163,24 @@ async def upload_receipt(bill_id: str,
         #get file url
         receipt_url = supabase.storage.from_("receipts").get_public_url(file_path)
         #update bill_shares with receipt url
-        supabase.table("bill_shares").update({"receipt":receipt_url, "paid_at":datetime.now().isoformat(), "paid":"pending"}).eq("bill_id",bill_id).eq("user_id",user_id).execute()
+        supabase.table("bill_shares").update({"receipt":receipt_url, "paid_at":datetime.now(timezone.utc).isoformat(), "paid":"pending"}).eq("bill_id",bill_id).eq("user_id",user_id).execute()
+        #get payer id and bill title for notifications
+        bill_data = supabase.table("bills").select("payer_id", "title").eq("id", bill_id).execute()
+        payer_id = bill_data.data[0]["payer_id"]
+        title = bill_data.data[0]["title"]
+        #get user name
+        user_data = supabase.table("users").select("name").eq("id", user_id).execute()
+        user_name = user_data.data[0]["name"]
+        #notify payer for approval
+        notifications = [
+            {
+                "user_id": payer_id,
+                "bill_id": bill_id,
+                "type": "receipt_uploaded",
+                "message": f"{user_name} uploaded a receipt for bill: {title}"
+            }
+        ]
+        supabase.table("notifications").insert(notifications).execute()
         return {"paid":"pending","receipt_url":receipt_url}
      except Exception as e:
         print("Error uploading receipt:", e)
@@ -192,12 +210,63 @@ def upload_main_bill(
         "total_amount": 0, #will updated by AI later
         "payer_id": user_id,
         "group_id": None, #user will update later
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
         "receipt": public_url
     }).execute()
     #get bill id
     bill_id = bill.data[0]["id"]
+    #AI extraction
+    ai_result = extract_receipt(public_url)
+    #get total amount from ai result
+    import re #import regex
+    match = re.search(r"\$?(\d+(\.\d{2})?)", ai_result) #get string that match with amount pattern
+    #convert matched str amount to num
+    total_amount = float(match.group(1)) if match else 0
+    title_pattern = r"(?i)merchant\s*name\s*(?:is|:)?\s*(.*?)(?:,|\n|\s+and\b|$)"
+    #get only merchant name from ai result
+    title_match = re.search(title_pattern, ai_result)
+    title = title_match.group(1).strip() if title_match else "Unknown"
+    #update bill with data from AI
+    supabase.table("bills").update({"title":title, "total_amount":total_amount}).eq("id", bill_id).execute()
     return {
         "bill_id": bill_id,
-        "receipt": public_url
+        "receipt": public_url,
+        "ai_result":ai_result,
+        "total_amount":total_amount,
+        "title": title
     }
+#update uploaded bill with group and split bill
+@router.post("/split")
+def split_bill(payload: SplitBill):
+    bill_id = payload.bill_id
+    group_id = payload.group_id
+    share_users = payload.shared_users
+    total_amount = payload.total_amount
+    title = payload.title
+    #update bill with group_id
+    supabase.table("bills").update({"group_id":group_id}).eq("id", bill_id).execute()
+    #calculate split
+    split_amount = total_amount/(len(share_users)+1) #plus payer
+    #create dict for each share user to insert
+    shares = [{
+        "bill_id": bill_id,
+        "user_id": uid,
+        "amount_owed":split_amount,
+        "paid": "unpaid",
+        "receipt": None,
+        "paid_at": None
+    } for uid in share_users]
+    #insert shares into db
+    supabase.table("bill_shares").insert(shares).execute()
+    #notify users about new bill
+    if share_users:
+        notifications = [
+        {  
+        "user_id": uid,
+        "bill_id": bill_id,
+        "type": "new_bill",
+        "message":f"You have been added to a new bill: {title}"
+        }
+        for uid in share_users]
+        supabase.table("notifications").insert(notifications).execute()
+    return {"amount_owed":split_amount}
