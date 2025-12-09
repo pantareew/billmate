@@ -1,6 +1,7 @@
 "use client";
 
 import { useUser } from "@/context/UserContext";
+import { Bell, LogOut } from "lucide-react";
 
 export default function NavBar() {
   const { currentUser, logout } = useUser();
@@ -10,12 +11,12 @@ export default function NavBar() {
         <h1 className="text-xl font-bold text-gray-800">BillMate</h1>
         {currentUser && (
           <div className="inline-flex items-center">
-            <p className="text-black">Notification</p>
+            <Bell className="text-amber-800 cursor-pointer mx-2" size={25} />
             <button
               onClick={logout}
               className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
             >
-              Logout
+              <LogOut className="text-red-900" size={25} />
             </button>
           </div>
         )}

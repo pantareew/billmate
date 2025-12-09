@@ -38,7 +38,7 @@ export default function DashboardChart() {
   return (
     <div>
       <h1>Bill Summary</h1>
-      <p>Track what you owe and whatothers owe you</p>
+      <p>Track what you owe and what others owe you</p>
 
       <div className="grid grid-cols-2 gap-4">
         {/*amount thae user owe*/}

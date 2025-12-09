@@ -98,6 +98,7 @@ export default function NewBillPage() {
         shared_users: selectedMembers.filter(
           (id) => id !== currentUser.id //exclude payer
         ),
+        title: aiResult.title,
       };
       await apiFetch("/bills/split", {
         method: "POST",
