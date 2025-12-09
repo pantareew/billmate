@@ -13,7 +13,7 @@ export type Notification = {
 
 export function useNotifications() {
   const { currentUser } = useUser();
-  const [notifcations, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true); //data is being fetched right after the component mounts
   //fetch notifications from db
   const fetchNotifications = async () => {
@@ -35,17 +35,17 @@ export function useNotifications() {
     fetchNotifications();
   }, [currentUser]);
   //mark notification as read
-  const markAsRead = async (notifcationId: string) => {
+  const markAsRead = async (notificationId: string) => {
     try {
       //update read in backend
-      await apiFetch(`/notifications/${notifcationId}/read`, {
+      await apiFetch(`/notifications/${notificationId}/read`, {
         method: "POST",
       });
       //update read in frontend thru state var
       setNotifications((prev) =>
         prev.map((notification) =>
-          notification.id === notifcationId
-            ? { ...notification, read: true }
+          notification.id === notificationId
+            ? { ...notification, read: true } //mark notification as read
             : notification
         )
       );
@@ -53,5 +53,5 @@ export function useNotifications() {
       console.error("Failed to mark notification as read:", err);
     }
   };
-  return { notifcations, loading, markAsRead };
+  return { notifications, loading, markAsRead };
 }
