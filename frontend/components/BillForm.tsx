@@ -34,15 +34,6 @@ export default function BillForm() {
     if (!currentUser) return;
     //fetch user's groups
     async function fetchGroups() {
-      {
-        /*const { data, error } = await supabase
-        .from("group_members")
-        .select("group_id, groups(id, name)") //get id and name of each group
-        .eq("user_id", currentUser.id);
-      if (!error && data) {
-        setGroups(data.map((item: any) => item.groups));
-      }*/
-      }
       try {
         const groups = await apiFetch<Group[]>(
           `/groups?user_id=${currentUser.id}`
