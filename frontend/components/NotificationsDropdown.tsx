@@ -14,11 +14,11 @@ export default function NotificationsDropdown() {
             <li
               key={n.id}
               className={`p-2 rounded ${
-                n.read ? "bg-gray-100" : "bg-blue-50"
+                n.read ? "bg-gray-100" : "bg-blue-100"
               } cursor-pointer hover:bg-blue-100`}
               onClick={() => markAsRead(n.id)}
             >
-              <p className="text-sm">{n.message}</p>
+              <p className="text-sm text-gray-500">{n.message}</p>
               <p className="text-xs text-gray-400">
                 {new Date(n.created_at).toLocaleString()}
               </p>

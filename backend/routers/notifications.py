@@ -12,5 +12,5 @@ def get_notifications(user_id: str = Query(...)):
 #mark a notification as read
 @router.post("/{notification_id}/read")
 def mark_as_read(notification_id: str):
-    supabase.table("notifications").update({"read",True}).eq("id",notification_id).execute()
+    supabase.table("notifications").update({"read": True}).eq("id",notification_id).execute()
     return {"status": "read"}

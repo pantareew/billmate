@@ -7,6 +7,136 @@ from ai import extract_receipt
 
 router = APIRouter(prefix="/bills", tags=["Bills"])
 
+@router.get("")
+def get_my_bills(user_id: str):
+    #payer bills
+    payer_bills_raw = supabase.table("bills").select(
+            "*, "
+            "groups(name), "  #fetch group name
+            "bill_shares(user_id, amount_owed, paid, receipt, users(name))"  # fetch shares with user names
+        ).eq("payer_id", user_id).execute().data or []
+
+    payer_bills = []
+    for bill in payer_bills_raw:
+        shares_detail = []
+        for share in bill.get("bill_shares", []):
+            shares_detail.append({
+                "user_id": share["user_id"],
+                "user_name": share.get("users", {}).get("name", "Unknown"),
+                "amount_owed": share["amount_owed"],
+                "paid": share["paid"],
+                "receipt": share.get("receipt")
+            })
+
+        payer_bills.append({
+            "id": bill["id"],
+            "title": bill["title"],
+            "group_name": bill.get("groups", {}).get("name", "Unknown"),
+            "total_amount": bill["total_amount"],
+            "created_at": bill["created_at"],
+            "payer_id": bill["payer_id"],
+            "payer_name": bill.get("users", {}).get("name", "Unknown"),  # payer user
+            "shares": shares_detail
+        })
+
+    #bills that user owes
+    owed_bills_raw = supabase.table("bill_shares").select(
+            "*, bills(*, groups(name), users(name))"  # fetch bill info, group name, payer name
+        ).eq("user_id", user_id).execute().data or []
+
+    owed_bills = []
+    for share in owed_bills_raw:
+        bill = share.get("bills")
+        if not bill:
+            continue
+        owed_bills.append({
+            "id": bill["id"],
+            "title": bill["title"],
+            "group_name": bill.get("groups", {}).get("name", "Unknown"),
+            "total_amount": bill["total_amount"],
+            "created_at": bill["created_at"],
+            "payer_id": bill["payer_id"],
+            "payer_name": bill.get("users", {}).get("name", "Unknown"),
+            "my_status": share["paid"],
+            "amount_owed": share["amount_owed"]
+        })
+
+    #combine bills
+    all_bills = payer_bills + owed_bills
+    return {"bills": all_bills}
+
+'''
+@router.get("")
+def get_my_bills(user_id: str):
+    all_users = supabase.table("users").select("id, name").execute().data or []
+    user_map = {u["id"]: u["name"] for u in all_users}
+
+    all_groups = supabase.table("groups").select("id, name").execute().data or []
+    group_map = {g["id"]: g["name"] for g in all_groups}
+    #payer bills
+    payer_bills_raw = supabase.table("bills").select("*").eq("payer_id", user_id).execute().data or []
+    payer_bills = []
+    #fetch all bill shares for payer bills
+    bill_ids = [bill["id"] for bill in payer_bills_raw]
+    shares_raw = supabase.table("bill_shares").select("bill_id, user_id, amount_owed, paid, receipt")\
+        .in_("bill_id", bill_ids).execute().data or []
+    #share users
+    shares_by_bill = {}
+    for share in shares_raw:
+        shares_by_bill.setdefault(share["bill_id"], []).append(share)
+
+    for bill in payer_bills_raw:
+        shares_detail = [
+            {
+                "user_id": s["user_id"],
+                "user_name": user_map.get(s["user_id"], "Unknown"),
+                "amount_owed": s["amount_owed"],
+                "paid": s["paid"],
+                "receipt": s["receipt"]
+            }
+            for s in shares_by_bill.get(bill["id"], [])
+        ]
+
+        payer_bills.append({
+            "id": bill["id"],
+            "title": bill["title"],
+            "group_name": group_map.get(bill["group_id"], "Unknown"),
+            "total_amount": bill["total_amount"],
+            "created_at": bill["created_at"],
+            "payer_id": bill["payer_id"],
+            "payer_name": user_map.get(bill["payer_id"], "Unknown"),
+            "shares": shares_detail
+        })
+
+    #bills that user owes
+    owed_raw = supabase.table("bill_shares").select("bill_id, paid, amount_owed")\
+        .eq("user_id", user_id).execute().data or []
+
+    owed_bills = []
+    owed_bill_ids = [item["bill_id"] for item in owed_raw]
+    owed_bills_data = supabase.table("bills").select("*").in_("id", owed_bill_ids).execute().data or []
+
+    for item in owed_raw:
+        bill = next((b for b in owed_bills_data if b["id"] == item["bill_id"]), None)
+        if not bill:
+            continue
+        owed_bills.append({
+            "id": bill["id"],
+            "title": bill["title"],
+            "group_name": group_map.get(bill["group_id"], "Unknown"),
+            "total_amount": bill["total_amount"],
+            "created_at": bill["created_at"],
+            "payer_id": bill["payer_id"],
+            "payer_name": user_map.get(bill["payer_id"], "Unknown"),
+            "my_status": item["paid"],
+            "amount_owed": item["amount_owed"]
+        })
+
+    #combine bills
+    all_bills = payer_bills + owed_bills
+    return {"bills": all_bills}
+'''
+'''
 #get all my bills
 @router.get("")
 def get_my_bills(user_id: str):
@@ -65,6 +195,7 @@ def get_my_bills(user_id: str):
     #combined payer bills and ower bills
     all_bills = payer_bills + owed_bills
     return {"bills":all_bills}
+'''
 #get total amount that user owes and others owe user
 @router.get("/summary")
 def get_bill_summary(user_id: str):

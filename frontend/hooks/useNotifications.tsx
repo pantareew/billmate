@@ -40,6 +40,9 @@ export function useNotifications() {
       //update read in backend
       await apiFetch(`/notifications/${notificationId}/read`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
       //update read in frontend thru state var
       setNotifications((prev) =>
