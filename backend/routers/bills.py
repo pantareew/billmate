@@ -200,22 +200,57 @@ def get_my_bills(user_id: str):
 @router.get("/summary")
 def get_bill_summary(user_id: str):
     
-    #amount user owes
-    my_unpaid = supabase.table("bill_shares").select("amount_owed").eq("user_id",user_id).in_("paid",["unpaid","pending"]).execute()
-    #get total amount user owes
-    you_owe = sum(item["amount_owed"] for item in my_unpaid.data)
+    #user owes others
+    my_unpaid = supabase.table("bill_shares").select("amount_owed, bill_id, paid, user_id, bill_id").eq("user_id",user_id).in_("paid",["unpaid","pending"]).execute()
+    you_owe = []
+    for item in my_unpaid.data:
+        #find bill info
+        bill = (
+            supabase.table("bills")
+            .select("payer_id")
+            .eq("id", item["bill_id"])
+            .single()
+            .execute()
+            .data
+        )
+        #find payer name
+        payer = (
+            supabase.table("users")
+            .select("name")
+            .eq("id", bill["payer_id"])
+            .single()
+            .execute()
+            .data
+        )
+        you_owe.append({
+            "name": payer["name"],
+            "amount": item["amount_owed"]
+        })
 
-    #amount others owe
+    #others owe user
     my_bills = supabase.table("bills").select("id").eq("payer_id", user_id).execute() #get all bills that user paid
     bill_ids = [bill["id"] for bill in my_bills.data] #extract only ids
+    owed_you = []
     #check if user paid any bills
     if bill_ids:
-        #get amount that shares owe
-        others_unpaid = supabase.table("bill_shares").select("amount_owed").in_("bill_id", bill_ids).in_("paid",["unpaid","pending"]).execute()
-        #get total amount owed to the user
-        owed_you = sum(item["amount_owed"] for item in others_unpaid.data)
-    else:
-        owed_you = 0
+        #get amount and user that owe
+        others_unpaid = supabase.table("bill_shares").select("amount_owed, user_id").in_("bill_id", bill_ids).in_("paid",["unpaid","pending"]).execute()
+        for item in others_unpaid.data:
+            # find debtor name
+            debtor = (
+                supabase.table("users")
+                .select("name")
+                .eq("id", item["user_id"])
+                .single()
+                .execute()
+                .data
+            )
+
+            owed_you.append({
+                "name": debtor["name"],
+                "amount": item["amount_owed"]
+            })
+
     return {"you_owe": you_owe, "owed_you":owed_you
             }
 #create new bill
