@@ -4,9 +4,10 @@ from models import CreateBill, ApproveRequest, SplitBill
 from datetime import datetime, timezone
 import uuid
 from ai import extract_receipt
+from collections import defaultdict
 
 router = APIRouter(prefix="/bills", tags=["Bills"])
-
+'''
 @router.get("")
 def get_my_bills(user_id: str):
     #payer bills
@@ -64,7 +65,7 @@ def get_my_bills(user_id: str):
     #combine bills
     all_bills = payer_bills + owed_bills
     return {"bills": all_bills}
-
+'''
 '''
 @router.get("")
 def get_my_bills(user_id: str):
@@ -136,7 +137,7 @@ def get_my_bills(user_id: str):
     all_bills = payer_bills + owed_bills
     return {"bills": all_bills}
 '''
-'''
+
 #get all my bills
 @router.get("")
 def get_my_bills(user_id: str):
@@ -195,62 +196,54 @@ def get_my_bills(user_id: str):
     #combined payer bills and ower bills
     all_bills = payer_bills + owed_bills
     return {"bills":all_bills}
-'''
+
 #get total amount that user owes and others owe user
 @router.get("/summary")
 def get_bill_summary(user_id: str):
-    
-    #user owes others
-    my_unpaid = supabase.table("bill_shares").select("amount_owed, bill_id, paid, user_id, bill_id").eq("user_id",user_id).in_("paid",["unpaid","pending"]).execute()
-    you_owe = []
-    for item in my_unpaid.data:
-        #find bill info
-        bill = (
-            supabase.table("bills")
-            .select("payer_id")
-            .eq("id", item["bill_id"])
-            .single()
-            .execute()
-            .data
-        )
-        #find payer name
-        payer = (
-            supabase.table("users")
-            .select("name")
-            .eq("id", bill["payer_id"])
-            .single()
-            .execute()
-            .data
-        )
-        you_owe.append({
-            "name": payer["name"],
-            "amount": item["amount_owed"]
-        })
+    #join bill_shares and users table
+    shares = (
+        supabase.table("bill_shares")
+        .select("amount_owed, paid, bill_id, bills!inner(payer_id), users!bill_shares_user_id_fkey1(name)")
+        .eq("user_id", user_id)
+        .in_("paid", ["unpaid", "pending"])
+        .execute()
+        .data
+    )
+    you_owe_map = defaultdict(float) #set each key to have default value of 0.0
+    for s in shares:
+        payer_id = s["bills"]["payer_id"]
+        payer = supabase.table("users").select("name").eq("id", payer_id).single().execute().data
+        payer_name = payer["name"]
+        you_owe_map[payer_name] += s["amount_owed"]
 
-    #others owe user
-    my_bills = supabase.table("bills").select("id").eq("payer_id", user_id).execute() #get all bills that user paid
-    bill_ids = [bill["id"] for bill in my_bills.data] #extract only ids
-    owed_you = []
-    #check if user paid any bills
+    you_owe = [{"name": name, "amount": amount} for name, amount in you_owe_map.items()]
+    my_bills = (
+        supabase.table("bills")
+        .select("id")
+        .eq("payer_id", user_id)
+        .execute()
+        .data
+    )
+    bill_ids = [b["id"] for b in my_bills]
+
+    owed_you_map = defaultdict(float)
+
     if bill_ids:
-        #get amount and user that owe
-        others_unpaid = supabase.table("bill_shares").select("amount_owed, user_id").in_("bill_id", bill_ids).in_("paid",["unpaid","pending"]).execute()
-        for item in others_unpaid.data:
-            # find debtor name
-            debtor = (
-                supabase.table("users")
-                .select("name")
-                .eq("id", item["user_id"])
-                .single()
-                .execute()
-                .data
-            )
+        owed_shares = (
+            supabase.table("bill_shares")
+            .select("user_id, amount_owed, paid, users(name)")
+            .in_("bill_id", bill_ids)
+            .in_("paid", ["unpaid", "pending"])
+            .execute()
+            .data
+        )
 
-            owed_you.append({
-                "name": debtor["name"],
-                "amount": item["amount_owed"]
-            })
+        #group total amount of each user
+        for item in owed_shares:
+            user_name = item["users"]["name"]
+            owed_you_map[user_name] += item["amount_owed"]
 
+    owed_you = [{"name": name, "amount": amount} for name, amount in owed_you_map.items()]
     return {"you_owe": you_owe, "owed_you":owed_you
             }
 #create new bill
