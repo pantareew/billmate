@@ -54,11 +54,11 @@ export default function DashboardPage() {
   if (!currentUser) return <p>Please log in</p>;
   if (loading) return <p>Loading dashboard...</p>;
   return (
-    <div className="max-w-4xl mx-auto px-6 space-y-6 pb-20">
+    <div className="max-w-7xl mx-auto px-6 space-y-6">
       <DashboardChart />
       {/* recent bills */}
       <div>
-        <h2 className="text-lg font-bold mb-3">Recent Bills</h2>
+        <h2 className="text-lg font-bold mb-3 text-[#db6162]">Recent Bills</h2>
 
         {bills.length === 0 ? (
           <p className="text-sm text-gray-500">No bills found</p>

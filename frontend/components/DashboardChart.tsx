@@ -3,22 +3,36 @@
 import { useUser } from "@/context/UserContext";
 import { apiFetch } from "@/lib/api";
 import { useEffect, useState } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
 
-type BillSummary = {
-  you_owe: number;
-  owed_you: number;
+type PersonAmount = {
+  name: string;
+  amount: number;
+};
+
+type SummaryDetail = {
+  you_owe: PersonAmount[];
+  owed_you: PersonAmount[];
 };
 
 export default function DashboardChart() {
   const { currentUser } = useUser();
-  const [summary, setSummary] = useState<BillSummary | null>(null);
+  const [summary, setSummary] = useState<SummaryDetail | null>(null);
   const [loading, setLoading] = useState(true);
   //get data from database
   useEffect(() => {
     if (!currentUser) return;
     async function loadSummary() {
       try {
-        const data = await apiFetch<BillSummary>(
+        const data = await apiFetch<SummaryDetail>(
           `/bills/summary?user_id=${currentUser.id}`
         );
         setSummary(data);
@@ -33,29 +47,75 @@ export default function DashboardChart() {
 
   if (!currentUser) return;
   if (loading)
-    return <p className="text-sm text-gray-500">Loading summary...</p>;
-  if (!summary) return null;
+    return <p className="text-sm text-gray-500">Loading bill summary...</p>;
+  if (!summary) return <p>No bill summary found</p>;
+
   return (
-    <div>
-      <h1>Bill Summary</h1>
-      <p>Track what you owe and what others owe you</p>
+    <div className="flex flex-col md:flex-row gap-4 w-full pt-6">
+      {/*user owes others */}
+      <div className="flex-1 w-full bg-white p-4 rounded-lg shadow-md">
+        <h3 className="text-lg font-bold mb-2 text-[#4f46e5] text-center">
+          You Owe Others
+        </h3>
+        {summary.you_owe.length === 0 ? (
+          <p className="text-gray-500 text-sm">You owe nobody!</p>
+        ) : (
+          <div className="w-full h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={summary.you_owe}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis
+                  label={{
+                    value: "$ Amount",
+                    angle: -90,
+                    position: "insideLeft",
+                  }}
+                />
+                <Tooltip
+                  formatter={(value: number) => `$${value.toFixed(2)}`}
+                  labelFormatter={(label) => (
+                    <span className="text-gray-400 font-medium">{label}</span>
+                  )}
+                />
+                <Bar dataKey="amount" fill="#4f46e5" barSize={50} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {/*amount thae user owe*/}
-        <div className="rounded-xl border p-4 bg-white shadow-sm">
-          <p className="text-sm text-gray-500 mb-1">You owe others</p>
-          <p className="text-2xl font-bold text-red-500">
-            ${summary.you_owe.toFixed(2)}
-          </p>
-        </div>
-
-        {/*amount others owed user */}
-        <div className="rounded-xl border p-4 bg-white shadow-sm">
-          <p className="text-sm text-gray-500 mb-1">Others owe you</p>
-          <p className="text-2xl font-bold text-green-600">
-            ${summary.owed_you.toFixed(2)}
-          </p>
-        </div>
+      {/*others owe you */}
+      <div className="flex-1 w-full bg-white p-4 rounded-lg shadow-md">
+        <h3 className="text-lg font-bold mb-2 text-[#ec4899] text-center">
+          Others Owe You
+        </h3>
+        {summary.owed_you.length === 0 ? (
+          <p className="text-gray-500 text-sm">Nobody owes you!</p>
+        ) : (
+          <div className="w-full h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={summary.owed_you}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis
+                  label={{
+                    value: "$ Amount",
+                    angle: -90,
+                    position: "insideLeft",
+                  }}
+                />
+                <Tooltip
+                  formatter={(value: number) => `$${value.toFixed(2)}`}
+                  labelFormatter={(label) => (
+                    <span className="text-gray-400 font-medium">{label}</span>
+                  )}
+                />{" "}
+                <Bar dataKey="amount" fill="#ec4899" barSize={50} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
     </div>
   );
