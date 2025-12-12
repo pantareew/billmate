@@ -93,75 +93,110 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
     setReceiptFile(null); // reset selected file
   };
   return (
-    <div className="border p-4 rounded-md shadow-sm">
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h3 className="text-lg font-semibold">{bill.title}</h3>
-          <p className="text-sm text-gray-500">{bill.group_name}</p>
-          <p className="text-sm">
-            Total: ${bill.total_amount.toFixed(2)} | Created:{" "}
-            {new Date(bill.created_at).toLocaleDateString()}
-          </p>
-          {bill.payer_id !== currentUserId && <p>Payer: {bill.payer_name}</p>}
-        </div>
-        <div>
-          {isPayer ? (
-            <p className="text-sm font-medium text-blue-600">
-              {/*show how many ppl have paid */}
-              {shares.filter((s) => s.paid === "paid").length} / {shares.length}{" "}
-              paid
-            </p>
-          ) : (
-            <div>
-              {/*showing how much currentUser owed in ower bill */}
-              <p className="text-sm text-gray-600 mt-1">
-                ${bill.amount_owed.toFixed(2)} per person
-              </p>
-              <p
-                className={`text-sm font-medium ${
-                  myStatus === "paid"
-                    ? "text-green-600"
-                    : myStatus === "pending"
-                    ? "text-yellow-600"
-                    : "text-red-600"
-                }`}
-              >
-                {/*show my status as an ower */}
-                {myStatus.toUpperCase()}
-              </p>
-            </div>
-          )}
-        </div>
+    <div className="rounded-lg border p-4 shadow-md hover:shadow-lg transition">
+      {/*header */}
+      <div className="flex justify-between items-center text-gray-700 text-lg font-semibold ">
+        <h4>{bill.title}</h4>
+        <p>${bill.total_amount.toFixed(2)}</p>
       </div>
-      {/*show approve option for pending shares */}
-      {isPayer && shares.length > 0 && (
-        <div className="mt-3">
-          <ul className="space-y-1">
-            {shares.map((s) => (
-              <li key={s.user_id} className="flex justify-between items-center">
-                <span>
-                  {s.user_name}: ${s.amount_owed.toFixed(2)} - {s.paid}{" "}
-                  {/*show shares status */}
-                </span>
-                {/*approve pending status */}
-                {s.paid === "pending" && (
-                  <button
-                    className="text-blue-600 text-sm underline"
-                    onClick={() => {
-                      console.log("Selected share:", s);
-                      console.log("Receipt URL:", s.receipt);
-                      setSelectedShare(s); //update share user
-                      setShowReceipt(true); //show receipt popup
-                    }}
+      {/*Group & $per person */}
+      <div className="flex justify-between items-center font-medium text-gray-500 text-sm">
+        <p>{bill.group_name}</p>
+        {/*is currentuser a payer */}
+        {isPayer ? (
+          <p>
+            {/*show how many ppl have paid */}
+            {shares.filter((s) => s.paid === "paid").length} / {shares.length}{" "}
+            paid
+          </p>
+        ) : (
+          <div>
+            {/*showing how much currentUser owed in ower bill */}
+            <p className="text-sm text-gray-600 mt-1">
+              ${bill.amount_owed.toFixed(2)}/person
+            </p>
+          </div>
+        )}
+      </div>
+      {/*show payer for ower billls and show shares for payer bills */}
+      <div className="flex justify-between items-center">
+        {!isPayer ? (
+          <p className="px-2 py-[2px] rounded-md bg-sky-100 text-sky-700 mt-2 mb-1 text-sm">
+            Payer: {bill.payer_name}
+          </p>
+        ) : shares.length > 0 ? (
+          <div className="my-2">
+            <ul className=" flex justify-between items-center">
+              {shares.map((s) => (
+                <li
+                  key={s.user_id}
+                  className="flex justify-between items-center mr-3"
+                >
+                  {/*display box color based on shares status */}
+                  <span
+                    className={`px-2 py-[2px] rounded-md text-sm
+                     ${
+                       s.paid === "paid"
+                         ? "bg-teal-100 text-teal-700"
+                         : s.paid === "pending"
+                         ? "bg-amber-100 text-amber-700 cursor-pointer hover:bg-amber-200"
+                         : "bg-rose-100 text-rose-700"
+                     }`}
                   >
-                    Approve
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+                    {s.user_name}: ${s.amount_owed.toFixed(2)}
+                  </span>
+                  {/*show approve option for pending shares */}
+                  {s.paid === "pending" && (
+                    <button
+                      className="text-blue-600 text-sm underline"
+                      onClick={() => {
+                        console.log("Selected share:", s);
+                        console.log("Receipt URL:", s.receipt);
+                        setSelectedShare(s); //update share user
+                        setShowReceipt(true); //show receipt popup
+                      }}
+                    >
+                      Approve
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+      {/*date & Pay Button or user status */}
+      <div className="flex justify-between items-center">
+        {/*date */}
+        <p className="text-gray-400 text-sm">
+          {new Date(bill.created_at).toLocaleDateString("en-AU", {
+            year: "2-digit",
+            month: "short",
+            day: "2-digit",
+          })}
+        </p>
+        {/*show Pay Now button if status === unpaid, else shows user status */}
+        {!isPayer ? (
+          myStatus === "unpaid" ? (
+            <button
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full cursor-pointer font-medium text-sm"
+              onClick={() => setShowUpload(true)}
+            >
+              PAY NOW
+            </button>
+          ) : (
+            <p
+              className={`text-sm font-semibold tracking-wide ${
+                myStatus === "paid" ? "text-emerald-600" : "text-amber-500"
+              }`}
+            >
+              {/*show my status as an ower */}
+              {myStatus.toUpperCase()}
+            </p>
+          )
+        ) : null}
+      </div>
+
       {/*show receipt popup for approval */}
       {showReceipt && selectedShare && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -196,17 +231,7 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
           </div>
         </div>
       )}
-      {/*show Pay now button for ower bill */}
-      {!isPayer && myStatus === "unpaid" && (
-        <div className="mt-3">
-          <button
-            className="bg-blue-600 text-white px-3 py-1 rounded cursor-pointer"
-            onClick={() => setShowUpload(true)}
-          >
-            Pay Now
-          </button>
-        </div>
-      )}
+
       {/*show popup to upload receipt */}
       {showUpload && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">

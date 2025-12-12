@@ -54,7 +54,7 @@ export default function DashboardPage() {
   if (!currentUser) return <p>Please log in</p>;
   if (loading) return <p>Loading dashboard...</p>;
   return (
-    <div className="max-w-7xl mx-auto px-6 space-y-6">
+    <div className="max-w-7xl mx-auto px-6 space-y-6 bg-white pb-8">
       <DashboardChart />
       {/* recent bills */}
       <div>
