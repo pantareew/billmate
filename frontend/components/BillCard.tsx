@@ -37,6 +37,7 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
   const [showReceipt, setShowReceipt] = useState(false);
   const [selectedShare, setSelectedShare] = useState<Share | null>(null);
   const isPayer = bill.payer_id === currentUserId; //check if currentUser is payer of the bill
+
   //approve receipt as a payer
   const handleApproveReceipt = async (share: Share) => {
     //call backend to mark paid for this share
@@ -96,7 +97,7 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
     <div className="rounded-lg border p-4 shadow-md hover:shadow-lg transition">
       {/*header */}
       <div className="flex justify-between items-center text-gray-700 text-lg font-semibold ">
-        <h4>{bill.title}</h4>
+        <h4 className="capitalize">{bill.title}</h4>
         <p>${bill.total_amount.toFixed(2)}</p>
       </div>
       {/*Group & $per person */}
@@ -132,8 +133,15 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
                   key={s.user_id}
                   className="flex justify-between items-center mr-3"
                 >
-                  {/*display box color based on shares status */}
+                  {/*display box color based on shares status and show approval popup for pending status*/}
                   <span
+                    title={
+                      s.paid === "paid"
+                        ? "Paid"
+                        : s.paid === "pending"
+                        ? "Pending - waiting for payer approval"
+                        : "Unpaid"
+                    }
                     className={`px-2 py-[2px] rounded-md text-sm
                      ${
                        s.paid === "paid"
@@ -142,23 +150,17 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
                          ? "bg-amber-100 text-amber-700 cursor-pointer hover:bg-amber-200"
                          : "bg-rose-100 text-rose-700"
                      }`}
+                    onClick={
+                      s.paid === "pending" //show approval popup of pending user
+                        ? () => {
+                            setSelectedShare(s); //update share user
+                            setShowReceipt(true); //show receipt popup
+                          }
+                        : undefined //nothing happens for other status
+                    }
                   >
                     {s.user_name}: ${s.amount_owed.toFixed(2)}
                   </span>
-                  {/*show approve option for pending shares */}
-                  {s.paid === "pending" && (
-                    <button
-                      className="text-blue-600 text-sm underline"
-                      onClick={() => {
-                        console.log("Selected share:", s);
-                        console.log("Receipt URL:", s.receipt);
-                        setSelectedShare(s); //update share user
-                        setShowReceipt(true); //show receipt popup
-                      }}
-                    >
-                      Approve
-                    </button>
-                  )}
                 </li>
               ))}
             </ul>
@@ -187,7 +189,7 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
           ) : (
             <p
               className={`text-sm font-semibold tracking-wide ${
-                myStatus === "paid" ? "text-emerald-600" : "text-amber-500"
+                myStatus === "paid" ? "text-[#08b354]" : "text-amber-500"
               }`}
             >
               {/*show my status as an ower */}
@@ -200,26 +202,24 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
       {/*show receipt popup for approval */}
       {showReceipt && selectedShare && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-cyan-500 p-4 rounded-md max-w-md w-full relative">
-            <h3 className="text-lg font-semibold text-center mb-4">
+          <div className="bg-white p-4 rounded-md max-w-md w-full relative">
+            <h3 className="text-lg text-center font-semibold mb-4 text-amber-800">
               Receipt from {selectedShare.user_name}
             </h3>
-            <div className="border-2 border-dashed border-gray-300 p-4 flex flex-col items-center">
-              <img
-                src={selectedShare.receipt}
-                alt="Receipt"
-                className="max-h-96 object-contain mb-4"
-              />
-            </div>
+            <img
+              src={selectedShare.receipt}
+              alt="Receipt"
+              className="max-h-96 object-contain mb-4"
+            />
             <div className="flex justify-end mt-4">
               <button
-                className="ml-2 bg-red-300 px-3 py-1 rounded mx-3 cursor-pointer"
+                className="ml-2 bg-white text-rose-700 px-3 py-1 mx-3 cursor-pointer"
                 onClick={() => setShowReceipt(false)}
               >
                 Cancel
               </button>
               <button
-                className="bg-green-600 text-white px-3 py-1 rounded cursor-pointer"
+                className="bg-[#08b354] text-white px-3 py-1 rounded cursor-pointer"
                 onClick={async () => {
                   await handleApproveReceipt(selectedShare);
                   setShowReceipt(false);
