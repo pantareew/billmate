@@ -67,8 +67,10 @@ export default function BillForm() {
           `/groups/${selectedGroup}/members`
         );
         setGroupMembers(members.map((item: any) => item.users));
-        //pre-select current user (bill's payer)
-        setSelectedMembers([currentUser.id]);
+        //get only user id of all members
+        const allUserIds = members.map((item: any) => item.users.id);
+        //pre-select all members in the group
+        setSelectedMembers(allUserIds);
       } catch (error: any) {
         console.error("Failed to fetch members:", error);
       }

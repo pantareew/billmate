@@ -118,22 +118,24 @@ export default function NewBillPage() {
     <div className="max-w-3xl mx-auto px-6 space-y-6 pt-6 pb-40">
       {/*upload mode */}
       {mode === "upload" ? (
-        <div className="space-y-4">
+        <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Upload Bill</h2>
+            <h2 className="text-2xl font-bold text-gray-600">Upload Bill</h2>
             {/*toggle to manual mode */}
             <button
               onClick={() => setMode("manual")}
-              className="bg-gray-500 px-4 py-2 rounded hover:bg-gray-400 cursor-pointer"
+              className="border-[#146ff7] border-2 text-[#146ff7] hover:bg-[#216edf] hover:text-white px-4 py-2 rounded cursor-pointer"
             >
               Create Bill Manually
             </button>
           </div>
-          <p className="text-gray-600 mb-4">Upload an image of your receipt</p>
+          <p className="text-gray-500 mb-2">
+            Just upload your receipt, and our AI will process it for you!
+          </p>
           {/*upload area */}
           {/*when this div box is clicked, it will open (from .click()) element with id fileInput (which is input type file)*/}
           <div
-            className="border-2 border-dashed border-gray-400 p-20 flex flex-col items-center justify-center cursor-pointer mb-6"
+            className="border-2 border-dashed border-indigo-300 bg-indigo-50 rounded-md p-20 flex flex-col items-center justify-center cursor-pointer mb-6"
             onClick={() => document.getElementById("fileInput")?.click()}
           >
             {/*preview the selected file or upload the file*/}
@@ -144,12 +146,10 @@ export default function NewBillPage() {
                 className="max-h-64"
               />
             ) : (
-              <div>
-                <p className="text-gray-400">
-                  <Camera size={25} />
-                  Click to upload receipt
-                </p>
-                <p className="text-gray-500">
+              <div className="text-center">
+                <Camera size={40} className="text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-400 mb-1"> Click to upload receipt</p>
+                <p className="text-gray-400/70 text-sm">
                   Only accept image file type (PNG, JPG, JPEG)
                 </p>
               </div>
@@ -232,7 +232,7 @@ export default function NewBillPage() {
             {/*switch to upload mode */}
             <button
               onClick={() => setMode("upload")}
-              className="bg-gray-500 px-4 py-2 rounded hover:bg-gray-400 cursor-pointer"
+              className="border-[#146ff7] border-2 text-[#146ff7] hover:bg-[#216edf] hover:text-white px-4 py-2 rounded cursor-pointer"
             >
               Upload Bill
             </button>
