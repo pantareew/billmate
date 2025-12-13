@@ -11,7 +11,7 @@ export default function MenuBar() {
   const activeClass = "text-blue-600";
   const inactiveClass = "text-gray-900";
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2 z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-white flex justify-around py-2 z-50">
       {/*Dashboard tab */}
       <button
         onClick={() => router.push("/dashboard")}

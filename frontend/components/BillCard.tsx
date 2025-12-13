@@ -94,7 +94,7 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
     setReceiptFile(null); // reset selected file
   };
   return (
-    <div className="rounded-lg border p-4 shadow-md hover:shadow-lg transition">
+    <div className="bg-white rounded-lg border border-white p-4 shadow-md hover:shadow-lg transition">
       {/*header */}
       <div className="flex justify-between items-center text-gray-700 text-lg font-semibold ">
         <h4 className="capitalize">{bill.title}</h4>
@@ -203,7 +203,7 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
       {showReceipt && selectedShare && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-md max-w-md w-full relative">
-            <h3 className="text-lg text-center font-semibold mb-4 text-amber-800">
+            <h3 className="text-md text-center font-semibold mb-4 text-black">
               Receipt from {selectedShare.user_name}
             </h3>
             <img
@@ -213,13 +213,13 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
             />
             <div className="flex justify-end mt-4">
               <button
-                className="ml-2 bg-white text-rose-700 px-3 py-1 mx-3 cursor-pointer"
+                className="ml-2 bg-white text-red-600 px-3 py-1 mx-3 cursor-pointer"
                 onClick={() => setShowReceipt(false)}
               >
                 Cancel
               </button>
               <button
-                className="bg-[#08b354] text-white px-3 py-1 rounded cursor-pointer"
+                className="bg-[#08b354] hover:bg-[#07a14c] text-white px-3 py-1 rounded cursor-pointer"
                 onClick={async () => {
                   await handleApproveReceipt(selectedShare);
                   setShowReceipt(false);
@@ -235,15 +235,15 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
       {/*show popup to upload receipt */}
       {showUpload && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-cyan-500 w-[400px] rounded-xl p-5 shadow-lg relative">
+          <div className="bg-white w-[400px] rounded-xl p-5 shadow-lg relative">
             {/*title */}
-            <h2 className="text-lg font-semibold text-center mb-4">
+            <h2 className="text-lg font-semibold text-center mb-4 text-indigo-500">
               Upload Receipt
             </h2>
             {/*upload box */}
             <label
               htmlFor="receipt-upload"
-              className="border-2 border-dashed border-gray-300 rounded-lg h-52 flex flex-col items-center justify-center cursor-pointer"
+              className="border-2 border-dashed border-indigo-300 rounded-lg h-52 flex flex-col items-center justify-center cursor-pointer"
             >
               {/*show uploaded file if exists */}
               {receiptFile ? (
@@ -254,8 +254,8 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
                 />
               ) : (
                 <>
-                  <Camera size={28} />
-                  <p className="text-sm text-gray-100 my-3">
+                  <Camera size={28} className="text-gray-300" />
+                  <p className="text-sm text-gray-300 my-3">
                     Click to upload receipt
                   </p>
                 </>
@@ -273,14 +273,14 @@ export default function BillCard({ bill, currentUserId }: BillCardProps) {
             <div className="flex justify-end mt-4 gap-2">
               <button
                 onClick={closeUpload}
-                className="px-4 py-2 rounded-md bg-red-400 text-sm cursor-pointer"
+                className="px-4 py-2 rounded-md text-red-600 text-sm cursor-pointer"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleUploadReceipt}
-                className="px-4 py-2 rounded-md bg-black text-white text-sm disabled:opacity-50 cursor-pointer"
+                className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white text-sm disabled:opacity-50 cursor-pointer"
               >
                 Upload Receipt
               </button>
