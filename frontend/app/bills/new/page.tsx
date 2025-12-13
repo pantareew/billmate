@@ -124,7 +124,7 @@ export default function NewBillPage() {
             {/*toggle to manual mode */}
             <button
               onClick={() => setMode("manual")}
-              className="border-[#146ff7] border-2 text-[#146ff7] hover:bg-[#146ff7] hover:text-white px-4 py-2 rounded-lg cursor-pointer"
+              className="border-[#146ff7] border-2 text-[#146ff7] hover:bg-[#146ff7] hover:text-white px-4 py-2 rounded-lg cursor-pointer font-semibold"
             >
               Create Bill Manually
             </button>
@@ -155,7 +155,7 @@ export default function NewBillPage() {
               </div>
             )}
             {loading && (
-              <p className="text-amber-500 flex items-center gap-2 my-4">
+              <p className="text-[#a1b9f9] flex items-center gap-2 my-4">
                 <Loader size={25} /> Processing with Open AI
               </p>
             )}
@@ -171,16 +171,16 @@ export default function NewBillPage() {
           {aiResult && (
             <>
               {/*show data from AI */}
-              <div className="bg-[#5b85f4] border border-[#a1b9f9] rounded-xl p-4 mt-4 shadow-sm">
+              <div className="bg-[#5b85f4] border border-[#5b85f4] rounded-xl p-4 mt-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-2 font-semibold text-white">
                   <CircleCheckBig size={20} />
                   <h3 className="text-md">Receipt Extracted</h3>
                 </div>
-                <p className="text-white flex justify-between text-sm">
+                <p className="text-white flex justify-between text-md">
                   <span className="font-medium">Merchant: </span>
                   <span>{aiResult.title}</span>
                 </p>
-                <p className="text-white flex justify-between text-sm mt-1">
+                <p className="text-white flex justify-between text-md mt-1">
                   <span className="font-medium">Total: </span>
                   <span>${aiResult.total_amount}</span>
                 </p>
@@ -194,10 +194,10 @@ export default function NewBillPage() {
                   {groups.map((group) => (
                     <div
                       key={group.id}
-                      className={`p-4 rounded-lg cursor-pointer border-2 transition shadow-sm text-[15px] ${
+                      className={`px-4 py-3 rounded-lg cursor-pointer border-1 transition shadow-sm text-[15px] ${
                         selectedGroup === group.id
-                          ? "border-violet-400/80 bg-violet-400 text-white"
-                          : "border-violet-400/80 bg-white hover:bg-violet-400 hover:border-violet-400/80 hover:text-white text-violet-600"
+                          ? "border-violet-500 bg-violet-600/80 text-white"
+                          : "border-violet-600/80 bg-white hover:bg-violet-600/80 hover:border-violet-500 hover:text-white text-violet-700"
                       }`}
                       onClick={() => setSelectedGroup(group.id)}
                     >
@@ -207,46 +207,48 @@ export default function NewBillPage() {
                 </div>
               </div>
               {/*select users */}
-              <div>
-                <h3 className="text-md font-semibold mt-3 mb-2 text-gray-700">
-                  Split Among
-                </h3>
-                <div className="flex space-x-6">
-                  {members.map((member) => {
-                    const isChecked = selectedMembers.includes(member.id); //check if user is in selectedMembers array
-                    return (
-                      <label
-                        key={member.id}
-                        className={`px-4 py-1 rounded-full cursor-pointer shadow-sm border text-sm ${
-                          isChecked
-                            ? "bg-[#cc8cb6] text-white border-[#cc8cb6] hover:bg-white hover:text-[#cc8cb6]"
-                            : "bg-white text-[#cc8cb6] hover:bg-[#cc8cb6] hover:text-white hover:border-[#cc8cb6]"
-                        }`}
-                      >
-                        <input
-                          hidden
-                          className="mr-2"
-                          type="checkbox"
-                          checked={isChecked} //tick the box if user is in selectedMembers
-                          onChange={() =>
-                            setSelectedMembers(
-                              (prev) =>
-                                isChecked //check if current array has this user
-                                  ? prev.filter((id) => id !== member.id) //remove user if already selected
-                                  : [...prev, member.id] //add user if not selected
-                            )
-                          }
-                        />
-                        {member.name}
-                      </label>
-                    );
-                  })}
+              {members.length > 0 && (
+                <div>
+                  <h3 className="text-md font-semibold mt-3 mb-2 text-gray-700">
+                    Split Among
+                  </h3>
+                  <div className="flex space-x-6">
+                    {members.map((member) => {
+                      const isChecked = selectedMembers.includes(member.id); //check if user is in selectedMembers array
+                      return (
+                        <label
+                          key={member.id}
+                          className={`px-4 py-1 rounded-full cursor-pointer shadow-sm border text-sm ${
+                            isChecked
+                              ? "bg-[#25aded] text-white border-[#25aded] hover:bg-white hover:text-[#25aded]"
+                              : "bg-white text-[#25aded] hover:bg-[#25aded] hover:text-white hover:border-[#25aded]"
+                          }`}
+                        >
+                          <input
+                            hidden
+                            className="mr-2"
+                            type="checkbox"
+                            checked={isChecked} //tick the box if user is in selectedMembers
+                            onChange={() =>
+                              setSelectedMembers(
+                                (prev) =>
+                                  isChecked //check if current array has this user
+                                    ? prev.filter((id) => id !== member.id) //remove user if already selected
+                                    : [...prev, member.id] //add user if not selected
+                              )
+                            }
+                          />
+                          {member.name}
+                        </label>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
               {/*split and create bill button*/}
               {selectedGroup && selectedMembers.length > 0 && (
                 <button
-                  className="float-right bg-indigo-500 py-2 px-4 rounded-lg text-white cursor-pointer hover:bg-indigo-600"
+                  className="float-right bg-indigo-500 mt-2 sm:mt-0 py-1 sm:py-2 sm:px-3.5 md:py-2 px-3 md:px-4 rounded-lg text-white cursor-pointer hover:bg-indigo-600"
                   onClick={handleSplit}
                 >
                   {splitting ? "Processing the bill..." : "Split & Create Bill"}
@@ -256,19 +258,21 @@ export default function NewBillPage() {
           )}
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-2">
           {/*manual mode */}
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Create a new bill</h2>
+            <h2 className="text-2xl font-bold text-gray-600">
+              Create a new bill
+            </h2>
             {/*switch to upload mode */}
             <button
               onClick={() => setMode("upload")}
-              className="border-[#146ff7] border-2 text-[#146ff7] hover:bg-[#216edf] hover:text-white px-4 py-2 rounded cursor-pointer"
+              className="border-[#146ff7] border-2 text-[#146ff7] hover:bg-[#146ff7] hover:text-white px-4 py-2 rounded-lg cursor-pointer font-semibold"
             >
               Upload Bill
             </button>
           </div>
-          <p className="text-gray-400 mb-4">
+          <p className="text-gray-500 mb-3">
             Fill out all these required fields
           </p>
           <BillForm />

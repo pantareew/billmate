@@ -171,80 +171,130 @@ export default function BillForm() {
   if (!currentUser) {
     return <p>Please log in to create a bill.</p>;
   }
+  const categories = ["Utilities", "Food", "Rent", "Entertainment"];
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-4 max-w-md mx-auto"
+      className="flex flex-col gap-4 max-w-full mx-auto"
     >
-      <input
-        type="text"
-        className="border p-2"
-        placeholder="Bill title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        required
-      />
-      <input
-        className="border p-2"
-        type="number"
-        placeholder="Total amount"
-        value={totalAmount}
-        onChange={(e) => setTotalAmount(e.target.value)}
-        required
-      />
-      <select
-        className="border p-2"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-      >
-        <option value="">Category (optional)</option>
-        <option value={"utilities"}>Utilities</option>
-        <option value={"food"}>Food</option>
-        <option value={"rent"}>Rent</option>
-        <option value={"rent"}>Entertainment</option>
-      </select>
-      <select
-        className="border p-2"
-        value={selectedGroup}
-        onChange={(e) => setSelectedGroup(e.target.value)}
-        required
-      >
-        <option value="">Select Group</option>
-        {/*render all user's groupd */}
-        {groups.map((group) => (
-          <option key={group.id} value={group.id}>
-            {group.name}
-          </option>
-        ))}
-      </select>
-      {groupMembers.length > 0 && (
-        <div className="flex flex-col gap-1">
-          <p>Split Among:</p>
-          {groupMembers.map((member) => (
-            <label key={member.id} className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                value={member.id}
-                checked={selectedMembers.includes(member.id)} //checked if member is in the array
-                onChange={(e) => {
-                  const userId = e.target.value;
-                  //get the latest state of the checkbox
-                  setSelectedMembers(
-                    (
-                      prev //prev is the current state value
-                    ) =>
-                      prev.includes(userId) //check if user already exists in the array
-                        ? prev.filter((id) => id !== userId) //remove user from the array (uncheck box)
-                        : [...prev, userId] //add user to the array
-                  );
-                }}
-              />
-              {member.name}
-            </label>
+      <div>
+        <h3 className="text-md font-semibold mb-1 text-gray-700">
+          Enter bill's name
+        </h3>
+        <input
+          type="text"
+          className="border border-indigo-800 p-2 rounded-md w-full"
+          placeholder="Bill title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <h3 className="text-md font-semibold mb-1 text-gray-700">
+          Enter bill's total amount
+        </h3>
+        <input
+          className="border border-indigo-700 p-2 rounded-md w-full"
+          type="number"
+          placeholder="Total amount"
+          value={totalAmount}
+          onChange={(e) => setTotalAmount(e.target.value)}
+          required
+        />
+      </div>
+      {/*select category */}
+      <div>
+        <h3 className="text-md font-semibold mb-2 text-gray-700">
+          Select Category
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((c) => {
+            const value = c.toLowerCase();
+            const isActive = category === value;
+
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setCategory(value)}
+                className={`px-4 py-1 rounded-full border text-sm transition cursor-pointer
+                ${
+                  isActive
+                    ? "bg-[#cc8cb6] text-white border-[#cc8cb6]"
+                    : "bg-white text-[#8f627f] border-[#8f627f] hover:bg-[#cc8cb6] hover:text-white"
+                }`}
+              >
+                {c}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      {/*show groups for selection */}
+      <div>
+        <h3 className="text-md font-semibold mb-2 text-gray-700">
+          Select a group
+        </h3>
+        <div className="space-y-4">
+          {groups.map((group) => (
+            <div
+              key={group.id}
+              className={`py-2.5 px-4 rounded-lg cursor-pointer border-1 transition shadow-sm text-[15px] ${
+                selectedGroup === group.id
+                  ? "border-violet-500 bg-violet-600/80 text-white"
+                  : "border-violet-600/80 bg-white hover:bg-violet-600/80 hover:border-violet-500 hover:text-white text-violet-700"
+              }`}
+              onClick={() => setSelectedGroup(group.id)}
+            >
+              <p className="font-medium">{group.name}</p>
+            </div>
           ))}
         </div>
+      </div>
+      {/*select users */}
+      {groupMembers.length > 0 && (
+        <div>
+          <h3 className="text-md font-semibold mt-1 mb-2 text-gray-700">
+            Split Among
+          </h3>
+          <div className="flex space-x-6">
+            {groupMembers.map((member) => {
+              const isChecked = selectedMembers.includes(member.id); //check if user is in selectedMembers array
+              return (
+                <label
+                  key={member.id}
+                  className={`px-4 py-1 rounded-full cursor-pointer shadow-sm border text-sm ${
+                    isChecked
+                      ? "bg-[#25aded] text-white border-[#25aded] hover:bg-white hover:text-[#25aded]"
+                      : "bg-white text-[#25a3dd] hover:bg-[#25aded] hover:text-white hover:border-[#25a3dd]"
+                  }`}
+                >
+                  <input
+                    hidden
+                    className="mr-2"
+                    type="checkbox"
+                    checked={isChecked} //tick the box if user is in selectedMembers
+                    onChange={() =>
+                      setSelectedMembers(
+                        (prev) =>
+                          isChecked //check if current array has this user
+                            ? prev.filter((id) => id !== member.id) //remove user if already selected
+                            : [...prev, member.id] //add user if not selected
+                      )
+                    }
+                  />
+                  {member.name}
+                </label>
+              );
+            })}
+          </div>
+        </div>
       )}
-      <button disabled={loading} className="bg-black text-white p-2 rounded">
+      <button
+        disabled={loading}
+        className="bg-indigo-500 text-white p-2 mt-2 rounded-lg cursor-pointer hover:bg-indigo-600"
+      >
         {loading ? "Creating..." : "Create Bill"}
       </button>
     </form>
