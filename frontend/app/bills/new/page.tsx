@@ -124,7 +124,7 @@ export default function NewBillPage() {
             {/*toggle to manual mode */}
             <button
               onClick={() => setMode("manual")}
-              className="border-[#146ff7] border-2 text-[#146ff7] hover:bg-[#146ff7] hover:text-white px-4 py-2 rounded-lg cursor-pointer font-semibold"
+              className="border-[#146ff7] border-1 text-[#146ff7] hover:bg-[#146ff7] hover:text-white px-4 py-2 rounded-full cursor-pointer font-semibold"
             >
               Create Bill Manually
             </button>
@@ -267,12 +267,12 @@ export default function NewBillPage() {
             {/*switch to upload mode */}
             <button
               onClick={() => setMode("upload")}
-              className="border-[#146ff7] border-2 text-[#146ff7] hover:bg-[#146ff7] hover:text-white px-4 py-2 rounded-lg cursor-pointer font-semibold"
+              className="border-[#146ff7] border-1 text-[#146ff7] hover:bg-[#146ff7] hover:text-white px-4 py-2 rounded-full cursor-pointer font-semibold"
             >
               Upload Bill
             </button>
           </div>
-          <p className="text-gray-500 mb-3">
+          <p className="text-gray-500 mb-2">
             Fill out all these required fields
           </p>
           <BillForm />

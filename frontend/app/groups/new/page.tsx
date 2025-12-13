@@ -2,6 +2,7 @@
 
 import { useUser } from "@/context/UserContext";
 import { apiFetch } from "@/lib/api";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -83,24 +84,43 @@ export default function CreateGroupPage() {
     }
   }
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border rounded shadow">
-      <h1 className="text-2xl font-bold mb-4">Create a New Group</h1>
-      <form onSubmit={handleCreateGroup} className="flex flex-col gap-4">
-        <input
-          type="text"
-          placeholder="Group Name"
-          value={groupName}
-          onChange={(e) => setGroupName(e.target.value)}
-          className="border p-2 rounded"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-black text-white p-2 rounded"
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="flex gap-5 float-right">
+        <Link
+          href="/groups/join"
+          className="border-1 border-[#956bff] text-[#956bff] bg-white hover:bg-[#956bff] hover:text-white px-4 py-2 rounded-full font-semibold shadow-md"
         >
-          {loading ? "Creating" : "Create Group"}
-        </button>
-      </form>
+          Join Group
+        </Link>
+
+        <Link
+          href="/groups"
+          className="border-1 border-[#956bff] text-[#956bff] bg-white hover:bg-[#956bff] hover:text-white px-4 py-2 rounded-full font-semibold shadow-md"
+        >
+          My Group
+        </Link>
+      </div>
+      <div className="max-w-md mx-auto mt-20 p-6 border border-[#6238cc] rounded-md shadow-md bg-white">
+        <h1 className="text-2xl font-bold mb-4 text-[#6238cc] text-center">
+          Create a New Group
+        </h1>
+        <form onSubmit={handleCreateGroup} className="flex flex-col gap-4">
+          <input
+            type="text"
+            placeholder="Group Name"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            className="border border-[#6238cc] p-2 rounded"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-[#7a46ff] text-white p-2 rounded"
+          >
+            {loading ? "Creating" : "Create Group"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

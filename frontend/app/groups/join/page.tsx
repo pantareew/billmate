@@ -2,7 +2,7 @@
 
 import { useUser } from "@/context/UserContext";
 import { apiFetch } from "@/lib/api";
-import { group } from "console";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -18,48 +18,6 @@ export default function JoinGroupPage() {
     if (!groupCode) return alert("Please enter a group code.");
     setLoading(true);
     try {
-      {
-        /*
-      //find group by code
-      const { data: group, error: groupError } = await supabase
-        .from("groups")
-        .select("id, name")
-        .eq("code", groupCode)
-        .single(); //check if entered code match with group's code
-      // group not found
-      if (groupError || !group) {
-        setLoading(false);
-        return alert("Group not found");
-      }
-      //check if user already joined
-      const { data: existing, error: existingError } = await supabase
-        .from("group_members")
-        .select("id")
-        .eq("group_id", group.id)
-        .eq("user_id", currentUser.id)
-        .single(); //check if group_id and user_id match
-      if (existing) {
-        setLoading(false);
-        return alert("You are already a member of this group.");
-      }
-      //insert into group_members
-      const { error: joinError } = await supabase.from("group_members").insert([
-        {
-          group_id: group.id,
-          user_id: currentUser.id,
-        },
-      ]);
-      setLoading(false);
-      if (joinError) {
-        return alert(joinError.message);
-      }
-      //success
-      alert(`You have joined "${group.name}" successfully`);
-      //reset
-      setGroupCode("");
-      //redirect
-      router.push("/groups"); */
-      }
       await apiFetch("/groups/join", {
         method: "POST",
         body: JSON.stringify({
@@ -78,24 +36,43 @@ export default function JoinGroupPage() {
     }
   }
   return (
-    <div className="max-w-md mx-auto mt-10">
-      <h1 className="text-2xl font-bold mb-4">Join Group</h1>
-      <form onSubmit={handleJoinGroup} className="flex flex-col gap-4">
-        <input
-          type="text"
-          placeholder="Enter group code"
-          className="border p-2"
-          value={groupCode}
-          onChange={(e) => setGroupCode(e.target.value)}
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-black text-white p-2 rounded"
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="flex gap-5 float-right">
+        <Link
+          href="/groups/new"
+          className="border-1 border-[#956bff] text-[#956bff] bg-white hover:bg-[#956bff] hover:text-white px-4 py-2 rounded-full font-semibold shadow-md"
         >
-          {loading ? "Joining..." : "Join Group"}
-        </button>
-      </form>
+          Create Group
+        </Link>
+
+        <Link
+          href="/groups"
+          className="border-1 border-[#956bff] text-[#956bff] bg-white hover:bg-[#956bff] hover:text-white px-4 py-2 rounded-full font-semibold shadow-md"
+        >
+          My Group
+        </Link>
+      </div>
+      <div className="max-w-md mx-auto mt-20 p-6 border border-[#6238cc] rounded-md shadow-md bg-white">
+        <h1 className="text-2xl font-bold mb-4 text-[#6238cc] text-center">
+          Join Group
+        </h1>
+        <form onSubmit={handleJoinGroup} className="flex flex-col gap-4">
+          <input
+            type="text"
+            placeholder="Enter group code"
+            className="border border-[#6238cc] p-2"
+            value={groupCode}
+            onChange={(e) => setGroupCode(e.target.value)}
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-[#7a46ff] text-white p-2 rounded"
+          >
+            {loading ? "Joining..." : "Join Group"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
