@@ -4,11 +4,13 @@ import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     //create user in auth.users
@@ -27,15 +29,16 @@ export default function SignupPage() {
     }
     //check for valid user before inserting into public.users
     if (!data.user) {
-      alert("Signup failed: No user returned");
+      alert("Signup failed");
       return;
+    } else {
+      //insert user into public.users
+      await supabase.from("users").insert({
+        id: data.user.id, //get id of the newly created user
+        name: displayName,
+      });
+      router.push("/dashboard");
     }
-    //insert user into public.users
-    await supabase.from("users").insert({
-      id: data.user.id, //get id of the newly created user
-      name: displayName,
-    });
-    alert("Signup successful!");
   }
   return (
     <div className="min-h-screen flex items-center justify-center grid grid-cols-1 xl:grid-cols-2">
@@ -49,30 +52,46 @@ export default function SignupPage() {
           onSubmit={handleSignup}
           className="w-full max-w-md bg-white p-8 rounded-xl shadow-md flex flex-col gap-4"
         >
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={150}
+            height={150}
+            className="mx-auto mb-4"
+          />
           <input
             type="text"
             placeholder="Display Name"
-            className="border p-2"
+            className="border border-[#6e3fe6] p-2 rounded-md"
             onChange={(e) => setDisplayName(e.target.value)}
             required
           />
           <input
             type="email"
             placeholder="Email"
-            className="border p-2"
+            className="border border-[#6e3fe6] p-2 rounded-md"
             onChange={(e) => setEmail(e.target.value)}
             required
           />
           <input
             type="password"
             placeholder="Password"
-            className="border p-2"
+            className="border border-[#6e3fe6] p-2 rounded-md"
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button type="submit" className="bg-blue-600 text-white p-2 rounded">
+          <button className="bg-violet-600 hover:bg-violet-700 text-white rounded-md py-2 font-semibold cursor-pointer">
             Sign up
           </button>
+          <p>
+            Already a member?{" "}
+            <Link
+              href={"/auth/login"}
+              className="font-semibold text-violet-500 hover:text-violet-600"
+            >
+              Login Now
+            </Link>
+          </p>
         </form>
       </div>
     </div>

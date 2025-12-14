@@ -26,11 +26,20 @@ export default function GroupsPage() {
   useEffect(() => {
     //check logged-in user for database
     if (!currentUser) return;
+
     async function fetchGroups() {
       setLoading(true);
+
       const groupsData = await apiFetch<Group[]>(
         `/groups?user_id=${currentUser.id}`
       );
+      console.log(groupsData);
+      //no groups are returned
+      if (!groupsData || groupsData.length === 0) {
+        setGroups([]);
+        setLoading(false);
+        return;
+      }
       const groupMembers = await Promise.all(
         groupsData.map(async (group) => {
           const members = await apiFetch<User[]>(`/groups/${group.id}/members`);
@@ -73,7 +82,7 @@ export default function GroupsPage() {
       {loading && <p className="text-gray-600">Loading groups...</p>}
       {/*no groups */}
       {!loading && groups.length === 0 ? (
-        <p>You are not in any groups yet.</p>
+        <p className="text-gray-600">You are not in any groups yet.</p>
       ) : (
         <ul className="space-y-5 my-4">
           {groups.map((group) => (
