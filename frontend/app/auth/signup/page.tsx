@@ -52,13 +52,15 @@ export default function SignupPage() {
           onSubmit={handleSignup}
           className="w-full max-w-md bg-white p-8 rounded-xl shadow-md flex flex-col gap-4"
         >
-          <Image
-            src="/logo.png"
-            alt="Logo"
-            width={150}
-            height={150}
-            className="mx-auto mb-4"
-          />
+          <Link href={"/"}>
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={150}
+              height={150}
+              className="mx-auto mb-4"
+            />
+          </Link>
           <input
             type="text"
             placeholder="Display Name"
