@@ -7,66 +7,7 @@ from ai import extract_receipt
 from collections import defaultdict
 
 router = APIRouter(prefix="/bills", tags=["Bills"])
-'''
-@router.get("")
-def get_my_bills(user_id: str):
-    #payer bills
-    payer_bills_raw = supabase.table("bills").select(
-            "*, "
-            "groups(name), "  #fetch group name
-            "bill_shares(user_id, amount_owed, paid, receipt, users(name))"  # fetch shares with user names
-        ).eq("payer_id", user_id).execute().data or []
 
-    payer_bills = []
-    for bill in payer_bills_raw:
-        shares_detail = []
-        for share in bill.get("bill_shares", []):
-            shares_detail.append({
-                "user_id": share["user_id"],
-                "user_name": share.get("users", {}).get("name", "Unknown"),
-                "amount_owed": share["amount_owed"],
-                "paid": share["paid"],
-                "receipt": share.get("receipt")
-            })
-
-        payer_bills.append({
-            "id": bill["id"],
-            "title": bill["title"],
-            "group_name": bill.get("groups", {}).get("name", "Unknown"),
-            "total_amount": bill["total_amount"],
-            "created_at": bill["created_at"],
-            "payer_id": bill["payer_id"],
-            "payer_name": bill.get("users", {}).get("name", "Unknown"),  # payer user
-            "shares": shares_detail
-        })
-
-    #bills that user owes
-    owed_bills_raw = supabase.table("bill_shares").select(
-            "*, bills(*, groups(name), users(name))"  # fetch bill info, group name, payer name
-        ).eq("user_id", user_id).execute().data or []
-
-    owed_bills = []
-    for share in owed_bills_raw:
-        bill = share.get("bills")
-        if not bill:
-            continue
-        owed_bills.append({
-            "id": bill["id"],
-            "title": bill["title"],
-            "group_name": bill.get("groups", {}).get("name", "Unknown"),
-            "total_amount": bill["total_amount"],
-            "created_at": bill["created_at"],
-            "payer_id": bill["payer_id"],
-            "payer_name": bill.get("users", {}).get("name", "Unknown"),
-            "my_status": share["paid"],
-            "amount_owed": share["amount_owed"]
-        })
-
-    #combine bills
-    all_bills = payer_bills + owed_bills
-    return {"bills": all_bills}
-'''
-'''
 @router.get("")
 def get_my_bills(user_id: str):
     all_users = supabase.table("users").select("id, name").execute().data or []
@@ -136,8 +77,8 @@ def get_my_bills(user_id: str):
     #combine bills
     all_bills = payer_bills + owed_bills
     return {"bills": all_bills}
-'''
 
+'''
 #get all my bills
 @router.get("")
 def get_my_bills(user_id: str):
@@ -196,14 +137,16 @@ def get_my_bills(user_id: str):
     #combined payer bills and ower bills
     all_bills = payer_bills + owed_bills
     return {"bills":all_bills}
-
+'''
 #get total amount that user owes and others owe user
 @router.get("/summary")
 def get_bill_summary(user_id: str):
     #join bill_shares and users table
     shares = (
         supabase.table("bill_shares")
-        .select("amount_owed, paid, bill_id, bills!inner(payer_id), users!bill_shares_user_id_fkey1(name)")
+        .select(
+            "amount_owed, paid, bills!inner(payer_id, users(name))"
+        )
         .eq("user_id", user_id)
         .in_("paid", ["unpaid", "pending"])
         .execute()
@@ -211,12 +154,13 @@ def get_bill_summary(user_id: str):
     )
     you_owe_map = defaultdict(float) #set each key to have default value of 0.0
     for s in shares:
-        payer_id = s["bills"]["payer_id"]
-        payer = supabase.table("users").select("name").eq("id", payer_id).single().execute().data
-        payer_name = payer["name"]
+        payer_name = s["bills"]["users"]["name"]
         you_owe_map[payer_name] += s["amount_owed"]
 
-    you_owe = [{"name": name, "amount": amount} for name, amount in you_owe_map.items()]
+    you_owe = [
+        {"name": name, "amount": round(amount, 2)}
+        for name, amount in you_owe_map.items()
+    ]
     my_bills = (
         supabase.table("bills")
         .select("id")
@@ -243,7 +187,10 @@ def get_bill_summary(user_id: str):
             user_name = item["users"]["name"]
             owed_you_map[user_name] += item["amount_owed"]
 
-    owed_you = [{"name": name, "amount": amount} for name, amount in owed_you_map.items()]
+    owed_you = [
+        {"name": name, "amount": round(amount, 2)}
+        for name, amount in owed_you_map.items()
+    ]
     return {"you_owe": you_owe, "owed_you":owed_you
             }
 #create new bill
@@ -381,10 +328,11 @@ def upload_main_bill(
     match = re.search(r"\$?(\d+(\.\d{2})?)", ai_result) #get string that match with amount pattern
     #convert matched str amount to num
     total_amount = float(match.group(1)) if match else 0
-    title_pattern = r"(?i)merchant\s*name\s*(?:is|:)?\s*(.*?)(?:,|\n|\s+and\b|$)"
+    #title_pattern = r'(?i)merchant\s*name\s*(?:is|:)?\s*["“]?(.*?)["”]?[.,]?(?:|\n|\s+and\b|$)'
+    title_pattern = r'(?i)merchant\s*name\s*(?:is|:)?\s*["“]?(.+?)(?:,|\s+and\b|\.|\n|$)'
     #get only merchant name from ai result
     title_match = re.search(title_pattern, ai_result)
-    title = title_match.group(1).strip() if title_match else "Unknown"
+    title = title_match.group(1).strip('" ').rstrip('.,') if title_match else "Unknown"
     #update bill with data from AI
     supabase.table("bills").update({"title":title, "total_amount":total_amount}).eq("id", bill_id).execute()
     return {

@@ -17,7 +17,7 @@ def get_my_group(user_id: str = Query(...)):
     group_ids = [m["group_id"] for m in membership.data]
     #no my groups
     if not group_ids:
-        return {"groups": []}
+        return []
     #get details of each group
     groups = supabase.table("groups").select("*").in_("id", group_ids).execute()
     return groups.data
