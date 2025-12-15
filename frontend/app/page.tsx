@@ -67,12 +67,12 @@ export default function Home() {
             How it works
           </h2>
           {/*steps */}
-          <div className="grid gap-12 md:grid-cols-3">
+          <div className="grid gap-12 lg:grid-cols-3">
             {/*step 1 */}
             <div className="flex flex-col items-center text-center">
               {/*frame */}
               <div
-                className="w-70 h-96 bg-white rounded-2xl shadow-md 
+                className="w-72 h-96 bg-white rounded-2xl shadow-md 
                           flex items-center justify-center mb-6"
               >
                 <Image
@@ -104,7 +104,7 @@ export default function Home() {
             <div className="flex flex-col items-center text-center">
               {/*frame */}
               <div
-                className="w-70 h-96 bg-white rounded-2xl shadow-md 
+                className="w-72 h-96 bg-white rounded-2xl shadow-md 
                           flex items-center justify-center mb-6"
               >
                 <Image
@@ -136,14 +136,14 @@ export default function Home() {
             <div className="flex flex-col items-center text-center">
               {/*frame */}
               <div
-                className="w-70 h-96 bg-white rounded-2xl shadow-md 
+                className="relative w-72 h-96 bg-white rounded-2xl shadow-md 
                           flex items-center justify-center mb-6"
               >
                 <Image
                   src="/view.png"
                   alt="view dashboard"
-                  width={300}
-                  height={300}
+                  fill
+                  className="object-contain"
                 />
               </div>
 
@@ -160,7 +160,47 @@ export default function Home() {
                 </h3>
               </div>
               <p className="mt-2 text-sm text-gray-500 max-w-xs">
-                See who owes what and payment status at a glance
+                See who owes what and payment status at a glance on dashboard
+                page
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/*future features */}
+      <section className="w-full bg-gradient-to-br from-violet-500 to-violet-700 py-20 px-6">
+        <div className="max-w-lg lg:max-w-6xl mx-auto text-center text-white">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            More powerful features on the way
+          </h2>
+          <p className="text-white/80 max-w-2xl mx-auto mb-12">
+            We're building smarter tools to make bill sharing effortless
+          </p>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Feature 1 */}
+            <div className="bg-white/10 backdrop-blur rounded-2xl p-6">
+              <h3 className="text-xl font-semibold mb-2">Per-item split</h3>
+              <p className="text-white/80 text-sm">
+                Split items individually instead of evenly
+              </p>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="bg-white/10 backdrop-blur rounded-2xl p-6">
+              <h3 className="text-xl font-semibold mb-2">
+                Receipt-based split suggestions
+              </h3>
+              <p className="text-white/80 text-sm">
+                Let AI suggest splits based on receipts
+              </p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="bg-white/10 backdrop-blur rounded-2xl p-6">
+              <h3 className="text-xl font-semibold mb-2">Spending charts</h3>
+              <p className="text-white/80 text-sm">
+                Visualise your spending over time
               </p>
             </div>
           </div>
