@@ -178,7 +178,7 @@ export default function Home() {
           </p>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Feature 1 */}
+            {/*feature 1 */}
             <div className="bg-white/10 backdrop-blur rounded-2xl p-6">
               <h3 className="text-xl font-semibold mb-2">Per-item split</h3>
               <p className="text-white/80 text-sm">
@@ -186,7 +186,7 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Feature 2 */}
+            {/*feature 2 */}
             <div className="bg-white/10 backdrop-blur rounded-2xl p-6">
               <h3 className="text-xl font-semibold mb-2">
                 Receipt-based split suggestions
@@ -196,7 +196,7 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Feature 3 */}
+            {/*feature 3 */}
             <div className="bg-white/10 backdrop-blur rounded-2xl p-6">
               <h3 className="text-xl font-semibold mb-2">Spending charts</h3>
               <p className="text-white/80 text-sm">
