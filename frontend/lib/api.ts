@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8000"; //api server
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!; //api server
 //api function
 export async function apiFetch<T>(
   endpoint: string, //route
