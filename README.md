@@ -12,7 +12,8 @@ This app is a smart bill‑splitting platform built to make managing shared expe
 * Get notified when added to a shared bill
 
 ## Technologies
-* Frontend: Next.js, React, Tailwind CSS
+* Frontend: Next.js (App Router), TypeScript, Tailwind CSS
 * Backend: FastAPI (Python)
-* Database & Auth: Supabase
-* AI: Open AI
+* Database: PostgreSQL
+* Auth & Storage: Supabase
+* AI: OpenAI Vision
