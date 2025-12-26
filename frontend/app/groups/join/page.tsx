@@ -20,6 +20,9 @@ export default function JoinGroupPage() {
     try {
       await apiFetch("/groups/join", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           code: groupCode,
           user_id: currentUser.id,

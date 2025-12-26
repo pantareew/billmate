@@ -69,6 +69,9 @@ export default function CreateGroupPage() {
       }
       await apiFetch("/groups", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           name: groupName,
           user_id: currentUser.id, //logged-in user
