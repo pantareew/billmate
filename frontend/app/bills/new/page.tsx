@@ -48,9 +48,6 @@ export default function NewBillPage() {
           total_amount: number;
           title: string;
         }>("/bills/upload", {
-          headers: {
-            "Content-Type": "application/json",
-          },
           method: "POST",
           body: formData,
         });
