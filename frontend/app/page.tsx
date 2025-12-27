@@ -60,6 +60,30 @@ export default function Home() {
           </div>
         </div>
       </main>
+      {/*video */}
+      <section className="w-full bg-gradient-to-br from-violet-500 to-violet-700 py-20 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col items-center gap-8">
+          {/* heading */}
+          <h2 className="text-3xl sm:text-4xl font-bold text-white text-center">
+            See Billmate in action
+          </h2>
+          <p className="text-white/80 text-center max-w-xl">
+            Watch our founder walk you through how to streamline your billing
+            instantly
+          </p>
+          {/* video */}
+          <div className="relative w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl">
+            <video
+              src="/demo.mp4"
+              controls
+              muted
+              playsInline
+              poster="/thumbnail.png"
+              className="w-full h-auto rounded-2xl"
+            />
+          </div>
+        </div>
+      </section>
       {/*how it works */}
       <section className="bg-white py-20">
         <div className="max-w-6xl mx-auto px-6">
@@ -206,6 +230,18 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <footer className="bg-gray-50 border-t py-4 px-6 text-sm text-gray-500 text-center">
+        <p>
+          © {new Date().getFullYear()} Billmate. All rights reserved. Follow us
+          on{" "}
+          <a
+            href="http://linkedin.com/company/billmateandmore/about/"
+            className="text-violet-500 hover:text-violet-600"
+          >
+            Linkedin
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }
