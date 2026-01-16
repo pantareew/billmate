@@ -11,19 +11,23 @@ export default function LoginPage() {
   //set state variables and functions
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
   //handle login
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    setIsLoading(true); //loading user
+    setError("");
     //supabase checks credentials
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    if (error) alert(error.message);
-    //credentials are correct
-    else {
-      localStorage.setItem("token", data.session?.access_token!);
+    if (authError) {
+      setError(authError.message);
+      setIsLoading(false);
+    } else {
       router.push("/dashboard");
     }
   }
@@ -49,6 +53,12 @@ export default function LoginPage() {
               className="mx-auto mb-4"
             />
           </Link>
+          {/*error message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
           <input
             type="email"
             placeholder="Email"
