@@ -141,58 +141,50 @@ def get_my_bills(user_id: str):
 #get total amount that user owes and others owe user
 @router.get("/summary")
 def get_bill_summary(user_id: str):
-    #join bill_shares and users table
-    shares = (
-        supabase.table("bill_shares")
-        .select(
-            "amount_owed, paid, bills!inner(payer_id, users(name))"
-        )
-        .eq("user_id", user_id)
-        .in_("paid", ["unpaid", "pending"])
-        .execute()
-        .data
-    )
-    you_owe_map = defaultdict(float) #set each key to have default value of 0.0
-    for s in shares:
-        payer_name = s["bills"]["users"]["name"]
-        you_owe_map[payer_name] += s["amount_owed"]
-
-    you_owe = [
-        {"name": name, "amount": round(amount, 2)}
-        for name, amount in you_owe_map.items()
-    ]
-    my_bills = (
-        supabase.table("bills")
-        .select("id")
-        .eq("payer_id", user_id)
-        .execute()
-        .data
-    )
-    bill_ids = [b["id"] for b in my_bills]
-
-    owed_you_map = defaultdict(float)
-
-    if bill_ids:
-        owed_shares = (
+    try:
+        #query 1 - what you owe
+        shares = (
             supabase.table("bill_shares")
-            .select("user_id, amount_owed, paid, users(name)")
-            .in_("bill_id", bill_ids)
+            .select("amount_owed, bills!inner(payer_id, users!inner(name))")
+            .eq("user_id", user_id)
             .in_("paid", ["unpaid", "pending"])
             .execute()
             .data
         )
+        you_owe_map = defaultdict(float) #set each key to have default value of 0.0
+        for s in shares:
+            payer_name = s["bills"]["users"]["name"]
+            you_owe_map[payer_name] += s["amount_owed"]
+
+        you_owe = [
+            {"name": name, "amount": round(amount, 2)}
+            for name, amount in you_owe_map.items()
+        ]
+        #query 2 what others owe you
+        owed_shares = (
+            supabase.table("bill_shares")
+            .select("amount_owed, users!inner(name), bills!inner(payer_id)")
+            .eq("bills.payer_id", user_id)
+            .in_("paid", ["unpaid", "pending"])
+            .neq("user_id", user_id)  # Exclude self
+            .execute()
+            .data
+        )
+
+        owed_you_map = defaultdict(float)
 
         #group total amount of each user
         for item in owed_shares:
             user_name = item["users"]["name"]
             owed_you_map[user_name] += item["amount_owed"]
-
-    owed_you = [
-        {"name": name, "amount": round(amount, 2)}
-        for name, amount in owed_you_map.items()
-    ]
-    return {"you_owe": you_owe, "owed_you":owed_you
-            }
+        owed_you = [
+            {"name": name, "amount": round(amount, 2)}
+            for name, amount in owed_you_map.items()
+        ]
+        return {"you_owe": you_owe, "owed_you": owed_you}
+    except Exception as e:
+        print(f"Error fetching summary: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 #create new bill
 @router.post("")
 def create_bill(payload: CreateBill):
