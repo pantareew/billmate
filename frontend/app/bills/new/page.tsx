@@ -1,12 +1,10 @@
 "use client";
 
-import BillForm from "@/components/BillForm";
-import { useUser } from "@/context/UserContext";
-import { useState, ChangeEvent, useEffect } from "react";
-import { Camera, Loader, CircleCheckBig } from "lucide-react";
-import { apiFetch } from "@/lib/api";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { Camera, Loader, CircleCheckBig } from "lucide-react";
+import { useUser } from "@/context/UserContext";
+import { apiFetch } from "@/lib/api";
 
 //group data type
 interface Group {
@@ -19,64 +17,88 @@ interface User {
   id: string;
   name: string;
 }
+
+//item type in a bill
+interface Item {
+  name: string;
+  price: number;
+}
+
+//ui steps
+type Step =
+  | "upload"
+  | "summary"
+  | "group"
+  | "splitType"
+  | "even"
+  | "item"
+  | "review";
+
 export default function NewBillPage() {
   const { currentUser } = useUser();
-  const [file, setFile] = useState<File | null>(null); //temporary store uploaded file
+  const router = useRouter();
+  const [step, setStep] = useState<Step>("upload"); //first step is to upload
+  const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<"manual" | "upload">("upload"); //toggling between two modes: upload bill and create bill manually
-  const [aiResult, setAiResult] = useState<any>(null);
+  const [billData, setBillData] = useState<{
+    //data in a bill
+    title: string;
+    total: number;
+    items: Item[];
+  } | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [members, setMembers] = useState<User[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  const [splitting, setSplitting] = useState(false);
-  const router = useRouter();
-  //upload bill to backend
+  const [saving, setSaving] = useState(false); //saving data to db
+  //upload receipt
   useEffect(() => {
     if (!file || !currentUser) return;
-    const uploadBill = async () => {
+    const upload = async () => {
       try {
         setLoading(true);
         //create formdata to send file
         const formData = new FormData();
         formData.append("receipt", file);
         formData.append("user_id", currentUser.id);
-
         //call backend to upload receipt file to storage
-        const data = await apiFetch<{
-          bill_id: string;
-          total_amount: number;
-          title: string;
-        }>("/bills/upload", {
+        const data = await apiFetch<any>("/bills/upload", {
           method: "POST",
           body: formData,
         });
-        setAiResult(data);
-        console.log("bill uploaded: ", data);
+
+        //store data from ai extract as editable draft
+        setBillData({
+          title: data.title,
+          total: data.total_amount,
+          items: data.items || [],
+        });
+        setStep("summary"); //data summary from ai extraction
       } catch (err: any) {
         alert(err.message);
       } finally {
         setLoading(false);
       }
     };
-    uploadBill();
-  }, [file]);
-  //get groups after have aiResult
+    upload();
+  }, [file, currentUser]);
+  //get groups after ai extraction
   useEffect(() => {
-    if (!aiResult) return;
+    if (!billData || !currentUser) return;
     const loadGroups = async () => {
       const data = await apiFetch<Group[]>(`/groups?user_id=${currentUser.id}`);
       setGroups(data);
     };
+
     loadGroups();
-  }, [aiResult]);
+  }, [billData, currentUser]);
   //load group's members when group is selected
   useEffect(() => {
-    if (!selectedGroup) return;
+    if (!selectedGroup) return; //need to select group first
+
     const loadMembers = async () => {
-      const data = await apiFetch<User[]>( //api returns array of users obj
-        `/groups/${selectedGroup}/members`
-      );
+      //api returns array of users obj
+      const data = await apiFetch<User[]>(`/groups/${selectedGroup}/members`);
       //set all members of the group for rendering
       setMembers(data.map((item: any) => item.users));
       //get only user id of all members
@@ -84,200 +106,263 @@ export default function NewBillPage() {
       //pre-select all members in the group
       setSelectedMembers(allUserIds);
     };
+
     loadMembers();
   }, [selectedGroup]);
 
-  //handle splitting bill and update database
-  const handleSplit = async () => {
+  //save data to db
+  const handleSave = async () => {
+    if (!billData || !selectedGroup) return;
+
     try {
-      setSplitting(true);
-      const payload = {
-        bill_id: aiResult.bill_id,
-        group_id: selectedGroup,
-        total_amount: aiResult.total_amount,
-        shared_users: selectedMembers.filter(
-          (id) => id !== currentUser.id //exclude payer
-        ),
-        title: aiResult.title,
-      };
-      await apiFetch("/bills/split", {
+      setSaving(true);
+
+      await apiFetch("/bills/confirm", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...billData,
+          group_id: selectedGroup,
+          shared_users: selectedMembers.filter((id) => id !== currentUser?.id), //exclude payer
+        }),
       });
+
       router.push("/dashboard");
-    } catch (error: any) {
-      alert(error.message);
+    } catch (err: any) {
+      alert(err.message);
     } finally {
-      setSplitting(false);
+      setSaving(false);
     }
   };
   return (
-    <div className="max-w-3xl mx-auto px-6 space-y-6 pt-6 pb-15 mt-5 mb-20 bg-white rounded-xl shadow-md">
-      {/*upload mode */}
-      {mode === "upload" ? (
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-600">Upload Bill</h2>
-            {/*toggle to manual mode */}
-            <button
-              onClick={() => setMode("manual")}
-              className="border-[#146ff7] border-1 text-[#146ff7] hover:bg-[#146ff7] hover:text-white px-4 py-2 rounded-full cursor-pointer font-semibold"
-            >
-              Create Bill Manually
-            </button>
-          </div>
-          <p className="text-gray-500 mb-2">
-            Just upload your receipt, and our AI will process it for you!
-          </p>
-          {/*upload area */}
-          {/*when this div box is clicked, it will open (from .click()) element with id fileInput (which is input type file)*/}
-          <div
-            className="border-2 border-dashed border-[#146ff7] bg-blue-50 rounded-md px-20 py-5 flex flex-col items-center justify-center cursor-pointer mb-6"
-            onClick={() => document.getElementById("fileInput")?.click()}
-          >
-            {/*preview the selected file or upload the file*/}
-            {file ? (
-              <img
-                src={URL.createObjectURL(file)}
-                alt="Receipt Preview"
-                className="max-h-80"
-              />
-            ) : (
-              <div className="text-center py-30">
-                <Camera size={40} className="text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-400 mb-1"> Click to upload receipt</p>
-                <p className="text-gray-400/70 text-sm">
-                  Only accept image file type (PNG, JPG, JPEG)
-                </p>
-              </div>
-            )}
-            {loading && (
-              <p className="text-[#a1b9f9] flex items-center gap-2 my-4">
-                <Loader size={25} /> Processing with Open AI
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="w-full max-w-2xl">
+        {/*upload */}
+        {step === "upload" && (
+          <div className="space-y-6">
+            {/*header */}
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent capitalize">
+                Upload your bill
+              </h2>
+              <p className="text-gray-600 text-lg">
+                Upload a photo and let AI handle the rest!
               </p>
-            )}
-          </div>
-          <input
-            id="fileInput"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
-          />
-          {/*when have data from AI */}
-          {aiResult && (
-            <>
-              {/*show data from AI */}
-              <div className="bg-[#5b85f4] border border-[#5b85f4] rounded-xl p-4 mt-4 shadow-sm">
-                <div className="flex items-center gap-2 mb-2 font-semibold text-white">
-                  <CircleCheckBig size={20} />
-                  <h3 className="text-md">Receipt Extracted</h3>
-                </div>
-                <p className="text-white flex justify-between text-md">
-                  <span className="font-medium">Merchant: </span>
-                  <span>{aiResult.title}</span>
-                </p>
-                <p className="text-white flex justify-between text-md mt-1">
-                  <span className="font-medium">Total: </span>
-                  <span>${aiResult.total_amount}</span>
-                </p>
-              </div>
-              {/*show groups for selection */}
-              <div>
-                <h3 className="text-md font-semibold mt-3 mb-2 text-gray-700">
-                  Select a group
-                </h3>
-                <div className="space-y-4">
-                  {groups.map((group) => (
-                    <div
-                      key={group.id}
-                      className={`px-4 py-3 rounded-lg cursor-pointer border-1 transition shadow-sm text-[15px] ${
-                        selectedGroup === group.id
-                          ? "border-violet-500 bg-violet-600/80 text-white"
-                          : "border-violet-600/80 bg-white hover:bg-violet-600/80 hover:border-violet-500 hover:text-white text-violet-700"
-                      }`}
-                      onClick={() => setSelectedGroup(group.id)}
-                    >
-                      <p className="font-medium">{group.name}</p>
+            </div>
+            {/*upload area */}
+            <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 overflow-hidden">
+              <div
+                className={`relative border-2 border-dashed rounded-3xl m-6 transition-all duration-300 cursor-pointer ${
+                  file
+                    ? "border-blue-300 bg-blue-50/30"
+                    : "border-gray-300 bg-gray-50/50 hover:border-blue-400 hover:bg-blue-50/20"
+                }`}
+                onClick={() => document.getElementById("fileInput")?.click()}
+              >
+                <div className="p-12">
+                  {file ? (
+                    <div className="space-y-4">
+                      {/*show uploaded img */}
+                      <div className="relative rounded-2xl overflow-hidden shadow-lg">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          className="max-h-80 w-full object-contain bg-white"
+                          alt="Receipt preview"
+                        />
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-              {/*select users */}
-              {members.length > 0 && (
-                <div>
-                  <h3 className="text-md font-semibold mt-3 mb-2 text-gray-700">
-                    Split Among
-                  </h3>
-                  <div className="flex space-x-6">
-                    {members.map((member) => {
-                      const isChecked = selectedMembers.includes(member.id); //check if user is in selectedMembers array
-                      return (
-                        <label
-                          key={member.id}
-                          className={`px-4 py-1 rounded-full cursor-pointer shadow-sm border text-sm ${
-                            isChecked
-                              ? "bg-[#25aded] text-white border-[#25aded] hover:bg-white hover:text-[#25aded]"
-                              : "bg-white text-[#25aded] hover:bg-[#25aded] hover:text-white hover:border-[#25aded]"
-                          }`}
-                        >
-                          <input
-                            hidden
-                            className="mr-2"
-                            type="checkbox"
-                            checked={isChecked} //tick the box if user is in selectedMembers
-                            onChange={() =>
-                              setSelectedMembers(
-                                (prev) =>
-                                  isChecked //check if current array has this user
-                                    ? prev.filter((id) => id !== member.id) //remove user if already selected
-                                    : [...prev, member.id] //add user if not selected
-                              )
-                            }
+                  ) : (
+                    <div className="text-center space-y-4">
+                      <div className="inline-flex items-center justify-center w-18 h-15 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl">
+                        <Camera className="text-blue-600" size={40} />
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-lg font-semibold text-gray-900">
+                          Click to upload receipt
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          or drag and drop your file here
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+                        <span>PNG, JPG up to 10MB</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {loading && (
+                    <div className="absolute inset-0 bg-white/95 backdrop-blur-sm flex items-center justify-center rounded-2xl">
+                      <div className="text-center space-y-4">
+                        <div className="relative inline-flex">
+                          <Loader
+                            className="animate-spin text-blue-600"
+                            size={48}
                           />
-                          {member.name}
-                        </label>
-                      );
-                    })}
-                  </div>
+                          <div className="absolute inset-0 animate-ping">
+                            <Loader
+                              className="text-blue-400 opacity-20"
+                              size={48}
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-lg font-semibold text-gray-900">
+                            Processing with AI...
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Extracting bill details
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-              {/*split and create bill button*/}
-              {selectedGroup && selectedMembers.length > 0 && (
-                <button
-                  className="float-right bg-indigo-500 mt-2 sm:mt-0 py-1 sm:py-2 sm:px-3.5 md:py-2 px-3 md:px-4 rounded-lg text-white cursor-pointer hover:bg-indigo-600"
-                  onClick={handleSplit}
-                >
-                  {splitting ? "Processing the bill..." : "Split & Create Bill"}
-                </button>
-              )}
-            </>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {/*manual mode */}
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-600">
-              Create a new bill
-            </h2>
-            {/*switch to upload mode */}
+                <input
+                  id="fileInput"
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========== SUMMARY ========== */}
+
+        {step === "summary" && billData && (
+          <div className="space-y-4">
+            <h2 className="font-semibold text-lg">Receipt Summary</h2>
+
+            <input
+              className="w-full border p-2 rounded"
+              value={billData.title}
+              onChange={(e) =>
+                setBillData((p) => p && { ...p, title: e.target.value })
+              }
+            />
+
+            <input
+              className="w-full border p-2 rounded"
+              type="number"
+              value={billData.total}
+              onChange={(e) =>
+                setBillData(
+                  (p) =>
+                    p && {
+                      ...p,
+                      total: Number(e.target.value),
+                    }
+                )
+              }
+            />
+
             <button
-              onClick={() => setMode("upload")}
-              className="border-[#146ff7] border-1 text-[#146ff7] hover:bg-[#146ff7] hover:text-white px-4 py-2 rounded-full cursor-pointer font-semibold"
+              className="btn-primary"
+              onClick={() => setStep("splitType")}
             >
-              Upload Bill
+              Continue
             </button>
           </div>
-          <p className="text-gray-500 mb-2">
-            Fill out all these required fields
-          </p>
-          <BillForm />
-        </div>
-      )}
+        )}
+
+        {/* ========== SPLIT TYPE ========== */}
+
+        {step === "splitType" && (
+          <div className="space-y-4 text-center">
+            <h2 className="font-semibold text-lg">How do you want to split?</h2>
+
+            <button className="btn" onClick={() => setStep("even")}>
+              Evenly
+            </button>
+
+            <button className="btn" onClick={() => setStep("item")}>
+              By Item
+            </button>
+          </div>
+        )}
+
+        {/* ========== ITEM EDIT ========== */}
+
+        {step === "item" && billData && (
+          <div className="space-y-3">
+            {billData.items.map((item, i) => (
+              <div key={i} className="flex gap-2">
+                <input
+                  className="border p-1 flex-1"
+                  value={item.name}
+                  onChange={(e) => {
+                    const copy = [...billData.items];
+                    copy[i].name = e.target.value;
+
+                    setBillData({
+                      ...billData,
+                      items: copy,
+                    });
+                  }}
+                />
+
+                <input
+                  className="border p-1 w-24"
+                  type="number"
+                  value={item.price}
+                  onChange={(e) => {
+                    const copy = [...billData.items];
+                    copy[i].price = Number(e.target.value);
+
+                    setBillData({
+                      ...billData,
+                      items: copy,
+                    });
+                  }}
+                />
+              </div>
+            ))}
+
+            <button className="btn-primary" onClick={() => setStep("review")}>
+              Continue
+            </button>
+          </div>
+        )}
+
+        {/* ========== REVIEW ========== */}
+
+        {step === "review" && billData && (
+          <div className="space-y-4">
+            <h2 className="font-semibold text-lg">Review</h2>
+
+            <p>Merchant: {billData.title}</p>
+            <p>Total: ${billData.total}</p>
+
+            <h3 className="font-medium mt-3">Select Group</h3>
+
+            {groups.map((g) => (
+              <div
+                key={g.id}
+                className={`p-2 border rounded cursor-pointer ${
+                  selectedGroup === g.id ? "bg-blue-500 text-white" : ""
+                }`}
+                onClick={() => setSelectedGroup(g.id)}
+              >
+                {g.name}
+              </div>
+            ))}
+
+            {selectedGroup && (
+              <button
+                disabled={saving}
+                onClick={handleSave}
+                className="btn-primary"
+              >
+                {saving ? "Saving..." : "Confirm & Save"}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

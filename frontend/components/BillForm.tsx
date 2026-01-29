@@ -51,17 +51,6 @@ export default function BillForm() {
     //check for logged in user and selectedGroup
     if (!currentUser || !selectedGroup) return;
     async function fetchMembers() {
-      {
-        /* const { data, error } = await supabase
-        .from("group_members")
-        .select("user_id, users(id,name)")
-        .eq("group_id", selectedGroup);
-      if (!error && data) {
-        setGroupMembers(data.map((item: any) => item.users));
-        //pre-select current user (payer/person who create the bill)
-        setSelectedMembers([currentUser!.id]); //selectedMember array has currentUser included
-      }*/
-      }
       try {
         const members = await apiFetch<User[]>( //api returns array of users obj
           `/groups/${selectedGroup}/members`
@@ -101,41 +90,6 @@ export default function BillForm() {
     setLoading(true); //start creating form
 
     try {
-      //inserting new bill to db
-      {
-        /*const { data: bill, error: billError } = await supabase
-        .from("bills")
-        .insert([
-          {
-            title,
-            total_amount: amount,
-            group_id: selectedGroup,
-            category,
-            created_by: currentUser.id, //who uploaded/paid this bill
-          },
-        ])
-        .select()
-        .single(); //to get bill id of the inserted bill
-      if (billError || !bill) {
-        throw billError || new Error("Bill creation failed");
-      }
-      //auto-split amount among all members
-      const numMembers = selectedMembers.length;
-      const splitAmount = parseFloat((amount / numMembers).toFixed(2));
-
-      //insert shares of a bill
-      const { error: shareError } = await supabase.from("bill_shares").insert(
-        selectedMembers.map((userId) => ({
-          bill_id: bill.id,
-          user_id: userId,
-          paid: userId === currentUser.id ? true : false, //person who create a bil is already paid, others are not
-          amount_owed: splitAmount,
-          receipt: null,
-        }))
-      );
-      if (shareError) throw shareError;
-      alert("Bill created successfully!");*/
-      }
       const bill = await apiFetch<{ id: string }>("/bills", {
         //return created bill as string
         method: "POST",
