@@ -14,7 +14,7 @@ class CreateBill(BaseModel):
     title: str #bill's title
     payer_id: UUID #logged-in user that create bill
     group_id: UUID
-    total: float
+    total_amount: float
     receipt:str
     #shared_user_ids: List[UUID] #list of users who owe money
 
@@ -23,7 +23,4 @@ class ApproveRequest(BaseModel): #return from payer's approval
 
 class SplitBill(BaseModel):
     bill_id: str
-    group_id: str
-    total_amount: float
     shared_users: List[str]
-    title: str

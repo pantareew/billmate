@@ -125,39 +125,7 @@ def get_bill_summary(user_id: str):
     except Exception as e:
         print(f"Error fetching summary: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-"""#create new bill
-@router.post("")
-def create_manual_bill(payload: CreateBill):
-        #insert bill
-        bill = supabase.table("bills").insert({
-            "title": payload.title,
-            "total_amount":payload.total_amount,
-            "group_id":str(payload.group_id),
-            "payer_id":str(payload.payer_id),
-            "category":payload.category
-        }).execute()
-        #get id of inserted bill
-        bill_id = bill.data[0]["id"]
-        #include payer in shares
-        bill_share_users = payload.shared_user_ids + [payload.payer_id]
-        #auto split
-        split_amount = payload.total_amount/len(bill_share_users)
-        #insert bill shares
-        share_rows = []
-        #loop through users that owe money
-        for user_id in payload.shared_user_ids:
-            share_rows.append({
-                "bill_id":bill_id,
-                "user_id":str(user_id),
-                "amount_owed":split_amount,
-                "paid": "unpaid",
-                "receipt": None,
-                "paid_at": None
-            })
-        #insert into db
-        supabase.table("bill_shares").insert(share_rows).execute()
-        return bill.data[0] #return newly created bill
-"""
+
 #approve payment for a specific user
 @router.post("/{bill_id}/approve")
 def approve_receipt(bill_id: str, payload: ApproveRequest):
@@ -256,8 +224,8 @@ def create_bill(data: CreateBill):
         result = supabase.table("bills").insert({
             "title": data.title,
             "total_amount": data.total_amount,
-            "payer_id": data.payer_id,
-            "group_id": data.group_id,
+            "payer_id": str(data.payer_id),
+            "group_id": str(data.group_id),
             "receipt": data.receipt,
             "created_at": datetime.now(timezone.utc).isoformat(),
         }).execute()
@@ -268,8 +236,7 @@ def create_bill(data: CreateBill):
         bill = result.data[0] #newly created bill
 
         return {
-            "id": bill["id"],
-            "total_amount": bill["total_amount"]
+            "id": bill["id"]
         }
 
     except Exception as e:
@@ -280,30 +247,45 @@ def create_bill(data: CreateBill):
 def split_bill(payload: SplitBill):
     bill_id = payload.bill_id
     share_users = payload.shared_users
-    total_amount = payload.total_amount
-    title = payload.title
-     #calculate split
+    #get bill from db
+    bill_res = supabase.table("bills").select("*").eq("id", bill_id).single().execute()
+    if not bill_res.data:
+        raise HTTPException(404, "Bill not found")
+    bill = bill_res.data
+
+    #check if bill already split
+    existing = supabase.table("bill_shares").select("id").eq("bill_id", bill_id).execute()
+    if existing.data:
+        raise HTTPException(400, "Bill already split")
+    #get data from bill
+    total_amount = bill["total_amount"]
+    title = bill["title"]
+    #shares array
+    shares = []
+    #calculate split
     split_amount = total_amount/(len(share_users)+1) #plus payer
-    #create dict for each share user to insert
-    shares = [{
-        "bill_id": bill_id,
-        "user_id": uid,
-        "amount_owed":split_amount,
-        "paid": "unpaid",
-        "receipt": None,
-        "paid_at": None
-    } for uid in share_users]
+    #dict for each share_user data
+    for uid in share_users:
+            shares.append({
+                "bill_id": bill_id,
+                "user_id": uid,
+                "amount_owed": split_amount,
+                "paid": "unpaid",
+                "receipt": None,
+                "paid_at": None
+            })
     #insert shares into db
     supabase.table("bill_shares").insert(shares).execute()
     #notify users about new bill
-    if share_users:
-        notifications = [
-        {  
-        "user_id": uid,
-        "bill_id": bill_id,
-        "type": "new_bill",
-        "message":f"You have been added to a new bill: {title}"
+    notifications = [
+        {
+            "user_id": uid,
+            "bill_id": bill_id,
+            "type": "new_bill",
+            "message": f"You have been added to a new bill: {title}"
         }
-        for uid in share_users]
-        supabase.table("notifications").insert(notifications).execute()
+        for uid in share_users
+    ]
+    supabase.table("notifications").insert(notifications).execute()
+    
     return {"amount_owed":split_amount}
