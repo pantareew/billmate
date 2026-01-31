@@ -78,71 +78,11 @@ def get_my_bills(user_id: str):
     all_bills = payer_bills + owed_bills
     return {"bills": all_bills}
 
-'''
-#get all my bills
-@router.get("")
-def get_my_bills(user_id: str):
-    #bills that user paid
-    payer_bills_raw = supabase.table("bills").select("*").eq("payer_id", user_id).execute().data
-    payer_bills = []   
-    #loop through each payer bill
-    for bill in payer_bills_raw:
-        #get group name
-        group = supabase.table("groups").select("name").eq("id", bill["group_id"]).single().execute().data
-        #get payer name
-        payer = supabase.table("users").select("name").eq("id", bill["payer_id"]).single().execute().data
-        #get bill shares for this bill
-        shares = supabase.table("bill_shares").select("user_id, amount_owed, paid, receipt").eq("bill_id", bill["id"]).execute().data
-        #map shares to include user names
-        shares_detail = []
-        for share in shares:
-            #get name of each user
-            user = supabase.table("users").select("name").eq("id", share["user_id"]).single().execute().data
-            shares_detail.append({
-                "user_id": share["user_id"],
-                "user_name": user["name"],
-                "amount_owed": share["amount_owed"],
-                "paid": share["paid"],
-                "receipt":share["receipt"]
-            })
-        #include all data to return
-        payer_bills.append({
-            "id": bill["id"],
-            "title": bill["title"],
-            "group_name": group["name"],
-            "total_amount": bill["total_amount"],
-            "created_at": bill["created_at"],
-            "payer_id": bill["payer_id"],
-            "payer_name": payer["name"],
-            "shares": shares_detail
-        })
-    #bills that user owes
-    owed_raw = supabase.table("bill_shares").select("bill_id, paid, amount_owed").eq("user_id", user_id).execute().data
-    owed_bills = []
-    for item in owed_raw:
-         bill = supabase.table("bills").select("*").eq("id", item["bill_id"]).single().execute().data
-         group = supabase.table("groups").select("name").eq("id", bill["group_id"]).single().execute().data
-         payer = supabase.table("users").select("name").eq("id", bill["payer_id"]).single().execute().data
-         owed_bills.append({
-            "id": bill["id"],
-            "title": bill["title"],
-            "group_name": group["name"],
-            "total_amount": bill["total_amount"],
-            "created_at": bill["created_at"],
-            "payer_id": bill["payer_id"],
-            "payer_name": payer["name"],
-            "my_status": item["paid"],
-            "amount_owed":item["amount_owed"]
-        })
-    #combined payer bills and ower bills
-    all_bills = payer_bills + owed_bills
-    return {"bills":all_bills}
-'''
 #get total amount that user owes and others owe user
 @router.get("/summary")
 def get_bill_summary(user_id: str):
     try:
-        #query 1 - what you owe
+        #query 1 what you owe
         shares = (
             supabase.table("bill_shares")
             .select("amount_owed, bills!inner(payer_id, users!inner(name))")
@@ -232,17 +172,6 @@ def approve_receipt(bill_id: str, payload: ApproveRequest):
         raise HTTPException(status_code=400, detail="Approval failed")
      return result.data[0]
 
-#pay for bill share
-#@router.post("/{bill_id}/pay")
-#def pay_bill(bill_id:str, payload:dict): #payload: {user_id:str, receipt:str}
-     #user_id = payload.get("user_id")
-     #receipt = payload.get("receipt_url")
-     #if not user_id or not receipt:
-          #raise HTTPException(status_code=400, detail="Missing user_id or receipt")
-     #update bill_shares with receipt and paid_at then mark as pending
-     #result = supabase.table("bill_shares").update({"receipt":receipt, "paid":"pending","paid_at":"NOW()"}).eq("bill_id",bill_id).eq("user_id",user_id).execute()
-     #return result.data[0]
-
 #upload rceipt for ower
 @router.post("/{bill_id}/upload_receipt")
 async def upload_receipt(bill_id: str, 
@@ -288,7 +217,6 @@ async def upload_receipt(bill_id: str,
 @router.post("/upload")
 def upload_main_bill(
     receipt: UploadFile = File(...), #receipt file
-    user_id: str = Form(...)
 ):
     #get file externsion
     file__ext = receipt.filename.split(".")[-1]
@@ -302,17 +230,6 @@ def upload_main_bill(
     supabase.storage.from_("receipts").upload(file_path, contents, {"content-type": receipt.content_type})
     #get public url
     public_url = supabase.storage.from_("receipts").get_public_url(file_path)
-    #insert into bills table
-    bill = supabase.table("bills").insert({
-        "title": "Draft bill", #will updated by AI later
-        "total_amount": 0, #will updated by AI later
-        "payer_id": user_id,
-        "group_id": None, #user will update later
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "receipt": public_url
-    }).execute()
-    #get bill id
-    bill_id = bill.data[0]["id"]
     #AI extraction
     ai_result = extract_receipt(public_url)
     #get total amount from ai result
@@ -320,20 +237,34 @@ def upload_main_bill(
     match = re.search(r"\$?(\d+(\.\d{2})?)", ai_result) #get string that match with amount pattern
     #convert matched str amount to num
     total_amount = float(match.group(1)) if match else 0
-    #title_pattern = r'(?i)merchant\s*name\s*(?:is|:)?\s*["“]?(.*?)["”]?[.,]?(?:|\n|\s+and\b|$)'
+    #title pattern
     title_pattern = r'(?i)merchant\s*name\s*(?:is|:)?\s*["“]?(.+?)(?:,|\s+and\b|\.|\n|$)'
     #get only merchant name from ai result
     title_match = re.search(title_pattern, ai_result)
     title = title_match.group(1).strip('" ').rstrip('.,') if title_match else "Unknown"
-    #update bill with data from AI
-    supabase.table("bills").update({"title":title, "total_amount":total_amount}).eq("id", bill_id).execute()
     return {
-        "bill_id": bill_id,
-        "receipt": public_url,
+        "receipt_url": public_url,
         "ai_result":ai_result,
         "total_amount":total_amount,
         "title": title
     }
+#user confirm bill data
+@router.post("/confirm")
+def confirm_bill(data: dict):
+    bill = supabase.table("bills").insert({
+        "title": data["title"],
+        "total_amount": data["total"],
+        "payer_id": data["user_id"],
+        "group_id": data.get("group_id"),
+        "receipt": data["receipt_url"],
+        "items": data.get("items", []),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }).execute()
+
+    return {
+        "bill_id": bill.data[0]["id"]
+    }
+
 #update uploaded bill with group and split bill
 @router.post("/split")
 def split_bill(payload: SplitBill):
