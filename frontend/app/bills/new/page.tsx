@@ -8,6 +8,7 @@ import {
   DollarSign,
   Edit3,
   ArrowRight,
+  ArrowLeft,
   Users,
 } from "lucide-react";
 import { useUser } from "@/context/UserContext";
@@ -88,6 +89,11 @@ export default function NewBillPage() {
       icon: "🧾",
     },
   ];
+  //even split
+  const perPersonAmount =
+    selectedMembers.length > 0 && billData
+      ? Number((billData.total / selectedMembers.length).toFixed(2))
+      : 0;
 
   //upload receipt
   useEffect(() => {
@@ -567,6 +573,122 @@ export default function NewBillPage() {
             <button className="btn-primary" onClick={() => setStep("review")}>
               Continue
             </button>
+          </div>
+        )}
+
+        {/*review*/}
+        {step === "review" && billData && (
+          <div className="space-y-3 mt-8 mb-14">
+            {/*header */}
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                Review & Confirm
+              </h2>
+              <p className="text-gray-600 text-lg">
+                Double-check everything looks good before creating the bill
+              </p>
+            </div>
+            {/*bill summary card*/}
+            <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 overflow-hidden">
+              {/*bill title*/}
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
+                <h4 className="text-white/80 text-sm font-medium mb-2">
+                  Bill Summary
+                </h4>
+                <h3 className="text-2xl font-bold text-white">
+                  {billData.title}
+                </h3>
+              </div>
+              {/*bill details */}
+              <div className="px-6 py-4 space-y-2">
+                {/*total amount */}
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl px-5 py-2 border-2 border-blue-100">
+                  <p className="text-sm text-gray-600 font-medium">
+                    Total Amount
+                  </p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    ${billData.total.toFixed(2)}
+                  </p>
+                </div>
+                {/*other details */}
+                <div className="space-y-3">
+                  {/*split method */}
+                  <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                    <span className="text-gray-600 font-medium">
+                      Split Method
+                    </span>
+                    <span className="px-4 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold capitalize">
+                      {splitType}
+                    </span>
+                  </div>
+                  {/*participants */}
+                  <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                    <span className="text-gray-600 font-medium">
+                      Participants
+                    </span>
+                    <span className="flex items-center gap-2 text-gray-900 font-semibold">
+                      <Users size={16} className="text-gray-400" />
+                      {selectedMembers.length} people
+                    </span>
+                  </div>
+                  {/*participants breakdown */}
+                  <h3 className="text-lg font-bold text-gray-900">
+                    Split Breakdown
+                  </h3>
+                  <div className="space-y-3">
+                    {members
+                      .filter((m) => selectedMembers.includes(m.id))
+                      .map((member, index) => (
+                        <div
+                          key={member.id}
+                          className="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-2xl border border-gray-100 "
+                        >
+                          <div className="flex items-center gap-3">
+                            {/* Name */}
+                            <div>
+                              <p className="font-semibold text-gray-900">
+                                {member.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Participant {index + 1}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Amount */}
+                          <div className="text-right">
+                            <p className="text-xl font-bold text-blue-600">
+                              $ {perPersonAmount}
+                            </p>
+                            <p className="text-xs text-gray-500">to pay</p>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                  {/*action buttons */}
+                  <div className="flex gap-4">
+                    {/*back btn */}
+                    <button
+                      onClick={() => setStep("group")}
+                      className="flex-1 bg-white border-2 border-gray-200 text-gray-700 py-4 rounded-2xl font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 flex items-center justify-center gap-2 shadow-sm hover:shadow-md group"
+                    >
+                      <ArrowLeft
+                        size={20}
+                        className="group-hover:-translate-x-1 transition-transform duration-300"
+                      />
+                      Back
+                    </button>
+                    {/*save btn */}
+                    <button
+                      onClick={handleSave}
+                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl "
+                    >
+                      Confirm & Create Bill
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
