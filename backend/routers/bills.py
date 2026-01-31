@@ -125,9 +125,9 @@ def get_bill_summary(user_id: str):
     except Exception as e:
         print(f"Error fetching summary: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-#create new bill
+"""#create new bill
 @router.post("")
-def create_bill(payload: CreateBill):
+def create_manual_bill(payload: CreateBill):
         #insert bill
         bill = supabase.table("bills").insert({
             "title": payload.title,
@@ -157,7 +157,7 @@ def create_bill(payload: CreateBill):
         #insert into db
         supabase.table("bill_shares").insert(share_rows).execute()
         return bill.data[0] #return newly created bill
-
+"""
 #approve payment for a specific user
 @router.post("/{bill_id}/approve")
 def approve_receipt(bill_id: str, payload: ApproveRequest):
@@ -248,34 +248,41 @@ def upload_main_bill(
         "total_amount":total_amount,
         "title": title
     }
-#user confirm bill data
-@router.post("/confirm")
-def confirm_bill(data: dict):
-    bill = supabase.table("bills").insert({
-        "title": data["title"],
-        "total_amount": data["total"],
-        "payer_id": data["user_id"],
-        "group_id": data.get("group_id"),
-        "receipt": data["receipt_url"],
-        "items": data.get("items", []),
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    }).execute()
 
-    return {
-        "bill_id": bill.data[0]["id"]
-    }
+#create bill after user confirms
+@router.post("/create")
+def create_bill(data: CreateBill):
+    try:
+        result = supabase.table("bills").insert({
+            "title": data.title,
+            "total_amount": data.total_amount,
+            "payer_id": data.payer_id,
+            "group_id": data.group_id,
+            "receipt": data.receipt,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }).execute()
 
-#update uploaded bill with group and split bill
+        if not result.data:
+            raise Exception("Failed to create bill")
+
+        bill = result.data[0] #newly created bill
+
+        return {
+            "id": bill["id"],
+            "total_amount": bill["total_amount"]
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+#update bill shares
 @router.post("/split")
 def split_bill(payload: SplitBill):
     bill_id = payload.bill_id
-    group_id = payload.group_id
     share_users = payload.shared_users
     total_amount = payload.total_amount
     title = payload.title
-    #update bill with group_id
-    supabase.table("bills").update({"group_id":group_id}).eq("id", bill_id).execute()
-    #calculate split
+     #calculate split
     split_amount = total_amount/(len(share_users)+1) #plus payer
     #create dict for each share user to insert
     shares = [{
