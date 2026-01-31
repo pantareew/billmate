@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Camera, Loader, DollarSign, Edit3, ArrowRight } from "lucide-react";
+import {
+  Camera,
+  Loader,
+  DollarSign,
+  Edit3,
+  ArrowRight,
+  Users,
+} from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import { apiFetch } from "@/lib/api";
 
@@ -111,16 +118,16 @@ export default function NewBillPage() {
     };
     upload();
   }, [file, currentUser]);
-  //get groups after ai extraction
+  //get groups of the user
   useEffect(() => {
-    if (!billData || !currentUser) return;
+    if (step !== "group" || !currentUser) return;
     const loadGroups = async () => {
       const data = await apiFetch<Group[]>(`/groups?user_id=${currentUser.id}`);
       setGroups(data);
     };
 
     loadGroups();
-  }, [billData, currentUser]);
+  }, [step, currentUser]);
   //load group's members when group is selected
   useEffect(() => {
     if (!selectedGroup) return; //need to select group first
@@ -129,7 +136,8 @@ export default function NewBillPage() {
       //api returns array of users obj
       const data = await apiFetch<User[]>(`/groups/${selectedGroup}/members`);
       //set all members of the group for rendering
-      setMembers(data.map((item: any) => item.users));
+      const users = data.map((item: any) => item.users);
+      setMembers(users);
       //get only user id of all members
       const allUserIds = data.map((item: any) => item.users.id);
       //pre-select all members in the group
@@ -391,7 +399,127 @@ export default function NewBillPage() {
             </div>
           </div>
         )}
+        {/*select group */}
+        {step === "group" && (
+          <div className="space-y-8">
+            {/*header */}
+            <div className="text-center space-y-3">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                Select Group & Participants
+              </h2>
+              <p className="text-gray-600 text-lg">
+                Choose your group and who's splitting the bill
+              </p>
+            </div>
 
+            {/*groups selection */}
+            <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 p-8">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                Your Groups
+              </h3>
+              <div className="space-y-3">
+                {groups.map((group) => {
+                  const isSelected = selectedGroup === group.id;
+                  return (
+                    <div
+                      key={group.id}
+                      onClick={() => setSelectedGroup(group.id)}
+                      className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 group
+            ${
+              isSelected
+                ? "showdow-lg border-purple-500"
+                : "border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md"
+            }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        {/*user icon */}
+                        <div
+                          className={`w-10 h-10 ${
+                            isSelected
+                              ? "bg-gradient-to-br from-purple-500 to-pink-600"
+                              : "bg-gray-100"
+                          } rounded-xl flex items-center justify-center transition-all duration-300 ${
+                            !isSelected && "group-hover:bg-gray-200"
+                          }`}
+                        >
+                          <Users
+                            className={
+                              isSelected ? "text-white" : "text-gray-400"
+                            }
+                            size={24}
+                          />
+                        </div>
+                        {/*group name */}
+                        <h4
+                          className={`font-bold text-lg ${
+                            isSelected ? "text-purple-600" : "text-gray-900"
+                          }`}
+                        >
+                          {group.name}
+                        </h4>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/*members selection*/}
+            {members.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-2 text-gray-700">
+                  Select People
+                </h3>
+
+                <div className="flex flex-wrap gap-3">
+                  {members.map((m) => {
+                    const checked = selectedMembers.includes(m.id);
+
+                    return (
+                      <button
+                        key={m.id}
+                        onClick={() =>
+                          setSelectedMembers((prev) =>
+                            checked
+                              ? prev.filter((id) => id !== m.id)
+                              : [...prev, m.id]
+                          )
+                        }
+                        className={`px-4 py-1 rounded-full border transition
+                  ${
+                    checked
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-white border-gray-300 hover:border-blue-400"
+                  }
+                `}
+                      >
+                        {m.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Continue Button */}
+            {selectedGroup && selectedMembers.length > 0 && (
+              <button
+                className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700"
+                onClick={() => {
+                  if (splitType === "even") {
+                    setStep("review");
+                  }
+
+                  if (splitType === "item") {
+                    setStep("itemAssign");
+                  }
+                }}
+              >
+                Continue
+              </button>
+            )}
+          </div>
+        )}
         {/*edit items */}
         {step === "itemAssign" && billData && (
           <div className="space-y-3">
