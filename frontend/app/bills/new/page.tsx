@@ -88,6 +88,7 @@ export default function NewBillPage() {
       icon: "🧾",
     },
   ];
+
   //upload receipt
   useEffect(() => {
     if (!file || !currentUser) return;
@@ -401,7 +402,7 @@ export default function NewBillPage() {
         )}
         {/*select group */}
         {step === "group" && (
-          <div className="space-y-8">
+          <div className="space-y-4">
             {/*header */}
             <div className="text-center space-y-3">
               <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
@@ -413,7 +414,7 @@ export default function NewBillPage() {
             </div>
 
             {/*groups selection */}
-            <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 p-8">
+            <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 px-8 py-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">
                 Your Groups
               </h3>
@@ -424,7 +425,7 @@ export default function NewBillPage() {
                     <div
                       key={group.id}
                       onClick={() => setSelectedGroup(group.id)}
-                      className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 group
+                      className={`px-4 py-2 rounded-2xl border-2 cursor-pointer transition-all duration-300 group
             ${
               isSelected
                 ? "showdow-lg border-purple-500"
@@ -465,16 +466,22 @@ export default function NewBillPage() {
             </div>
 
             {/*members selection*/}
-            {members.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-2 text-gray-700">
-                  Select People
-                </h3>
-
+            {selectedGroup && members.length > 0 && (
+              <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 px-8 py-6 space-y-4">
+                {/*header */}
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    Select Participants
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Choose who's sharing this bill ({selectedMembers.length}{" "}
+                    selected)
+                  </p>
+                </div>
+                {/*members name */}
                 <div className="flex flex-wrap gap-3">
                   {members.map((m) => {
                     const checked = selectedMembers.includes(m.id);
-
                     return (
                       <button
                         key={m.id}
@@ -485,13 +492,11 @@ export default function NewBillPage() {
                               : [...prev, m.id]
                           )
                         }
-                        className={`px-4 py-1 rounded-full border transition
-                  ${
-                    checked
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-white border-gray-300 hover:border-blue-400"
-                  }
-                `}
+                        className={`group relative px-5 py-2 rounded-2xl border-2 font-medium transition-all duration-300 flex items-center gap-3 ${
+                          checked
+                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-600 shadow-lg shadow-blue-500/30"
+                            : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:shadow-md"
+                        }`}
                       >
                         {m.name}
                       </button>
@@ -500,11 +505,10 @@ export default function NewBillPage() {
                 </div>
               </div>
             )}
-
-            {/* Continue Button */}
+            {/*continue btn */}
             {selectedGroup && selectedMembers.length > 0 && (
               <button
-                className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700"
+                className="w-full bg-gradient-to-b from-blue-500 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-2xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 flex items-center justify-center gap-3 group"
                 onClick={() => {
                   if (splitType === "even") {
                     setStep("review");
@@ -516,6 +520,10 @@ export default function NewBillPage() {
                 }}
               >
                 Continue
+                <ArrowRight
+                  size={20}
+                  className="group-hover:translate-x-1 transition-transform duration-300"
+                />
               </button>
             )}
           </div>
@@ -562,40 +570,6 @@ export default function NewBillPage() {
           </div>
         )}
       </div>
-
-      {/*review*/}
-      {step === "review" && billData && (
-        <div className="space-y-4">
-          <h2 className="font-semibold text-lg">Review</h2>
-
-          <p>Merchant: {billData.title}</p>
-          <p>Total: ${billData.total}</p>
-
-          <h3 className="font-medium mt-3">Select Group</h3>
-
-          {groups.map((g) => (
-            <div
-              key={g.id}
-              className={`p-2 border rounded cursor-pointer ${
-                selectedGroup === g.id ? "bg-blue-500 text-white" : ""
-              }`}
-              onClick={() => setSelectedGroup(g.id)}
-            >
-              {g.name}
-            </div>
-          ))}
-
-          {selectedGroup && (
-            <button
-              disabled={saving}
-              onClick={handleSave}
-              className="btn-primary"
-            >
-              {saving ? "Saving..." : "Confirm & Save"}
-            </button>
-          )}
-        </div>
-      )}
     </div>
   );
 }
