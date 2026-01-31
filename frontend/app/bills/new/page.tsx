@@ -28,10 +28,9 @@ interface Item {
 type Step =
   | "upload"
   | "summary"
-  | "group"
   | "splitType"
-  | "even"
-  | "item"
+  | "group"
+  | "itemAssign"
   | "review";
 
 type SplitOption = {
@@ -48,6 +47,7 @@ export default function NewBillPage() {
   const { currentUser } = useUser();
   const router = useRouter();
   const [step, setStep] = useState<Step>("upload"); //first step is to upload
+  const [splitType, setSplitType] = useState<"even" | "item" | null>(null); //split method
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [billData, setBillData] = useState<{
@@ -90,7 +90,6 @@ export default function NewBillPage() {
         //create formdata to send file
         const formData = new FormData();
         formData.append("receipt", file);
-        formData.append("user_id", currentUser.id);
         //call backend to upload receipt file to storage
         const data = await apiFetch<any>("/bills/upload", {
           method: "POST",
@@ -352,7 +351,10 @@ export default function NewBillPage() {
                   <button
                     key={option.id}
                     className={`w-full bg-white border-2 ${option.borderColor} rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden`}
-                    onClick={() => setStep(option.id)}
+                    onClick={() => {
+                      setSplitType(option.id);
+                      setStep("group");
+                    }}
                   >
                     <div className="p-6">
                       <div className="flex items-center gap-5">
@@ -378,7 +380,7 @@ export default function NewBillPage() {
                         </div>
                       </div>
 
-                      {/* Decorative gradient bar */}
+                      {/*decorative gradient bar */}
                       <div
                         className={`h-1 bg-gradient-to-r ${option.gradient} mt-6 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left`}
                       ></div>
@@ -390,8 +392,8 @@ export default function NewBillPage() {
           </div>
         )}
 
-        {/*edit item */}
-        {step === "item" && billData && (
+        {/*edit items */}
+        {step === "itemAssign" && billData && (
           <div className="space-y-3">
             {billData.items.map((item, i) => (
               <div key={i} className="flex gap-2">
@@ -432,8 +434,8 @@ export default function NewBillPage() {
           </div>
         )}
       </div>
-      {/* ========== REVIEW ========== */}
 
+      {/*review*/}
       {step === "review" && billData && (
         <div className="space-y-4">
           <h2 className="font-semibold text-lg">Review</h2>
