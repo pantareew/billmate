@@ -57,18 +57,20 @@ export default function NewBillPage() {
   const [step, setStep] = useState<Step>("upload"); //first step is to upload
   const [splitType, setSplitType] = useState<"even" | "item" | null>(null); //split method
   const [file, setFile] = useState<File | null>(null);
+  const [uploaded, setUploaded] = useState(false); //track uploaded file
   const [loading, setLoading] = useState(false);
   const [billData, setBillData] = useState<{
     //data in a bill
     title: string;
     total: number;
     items: Item[];
+    receipt_url: string;
   } | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [members, setMembers] = useState<User[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  const [saving, setSaving] = useState(false); //saving data to db
+  const [submitting, setSubmitting] = useState(false); //saving data to db
   const splitOptions: SplitOption[] = [
     {
       id: "even",
@@ -89,7 +91,7 @@ export default function NewBillPage() {
       icon: "🧾",
     },
   ];
-  //even split
+  //even split calculation
   const perPersonAmount =
     selectedMembers.length > 0 && billData
       ? Number((billData.total / selectedMembers.length).toFixed(2))
@@ -97,7 +99,7 @@ export default function NewBillPage() {
 
   //upload receipt
   useEffect(() => {
-    if (!file || !currentUser) return;
+    if (!file || !currentUser || uploaded) return;
     const upload = async () => {
       try {
         setLoading(true);
@@ -115,8 +117,10 @@ export default function NewBillPage() {
           title: data.title,
           total: data.total_amount,
           items: data.items || [],
+          receipt_url: data.receipt_url,
         });
         setStep("summary"); //data summary from ai extraction
+        setUploaded(true);
       } catch (err: any) {
         alert(err.message);
       } finally {
@@ -124,7 +128,8 @@ export default function NewBillPage() {
       }
     };
     upload();
-  }, [file, currentUser]);
+  }, [file, currentUser, uploaded]);
+
   //get groups of the user
   useEffect(() => {
     if (step !== "group" || !currentUser) return;
@@ -155,29 +160,56 @@ export default function NewBillPage() {
   }, [selectedGroup]);
 
   //save data to db
-  const handleSave = async () => {
-    if (!billData || !selectedGroup) return;
+  const handleSubmit = async () => {
+    //validating data
+    if (!billData) {
+      alert("Bill data is missing.");
+      return;
+    }
 
+    if (!selectedGroup) {
+      alert("Please select a group.");
+      return;
+    }
+
+    if (!selectedMembers || selectedMembers.length === 0) {
+      alert("Please select participants.");
+      return;
+    }
     try {
-      setSaving(true);
-
-      await apiFetch("/bills/confirm", {
+      setSubmitting(true);
+      const payload = {
+        title: billData.title,
+        total_amount: billData.total,
+        group_id: selectedGroup,
+        payer_id: currentUser.id,
+        receipt: billData.receipt_url,
+      };
+      console.log("📤 Sending payload:", payload);
+      const bill = await apiFetch<any>("/bills/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      console.log("✅ Bill created:", bill);
+      await apiFetch("/bills/split", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...billData,
-          group_id: selectedGroup,
-          shared_users: selectedMembers.filter((id) => id !== currentUser?.id), //exclude payer
+          bill_id: bill.id,
+          shared_users: selectedMembers.filter((id) => id !== currentUser?.id), //exclude payer to be added to bill_shares
         }),
       });
-
       router.push("/dashboard");
     } catch (err: any) {
-      alert(err.message);
+      console.error("❌ Raw error:", err);
+      console.error("❌ Error message:", err.message);
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   };
   return (
@@ -255,7 +287,10 @@ export default function NewBillPage() {
                   type="file"
                   hidden
                   accept="image/*"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  onChange={(e) => {
+                    setFile(e.target.files?.[0] || null);
+                    setUploaded(false); // reset upload state
+                  }}
                 />
               </div>
             </div>
@@ -611,9 +646,9 @@ export default function NewBillPage() {
                   </p>
                 </div>
                 {/*other details */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {/*split method */}
-                  <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
                     <span className="text-gray-600 font-medium">
                       Split Method
                     </span>
@@ -644,7 +679,7 @@ export default function NewBillPage() {
                           className="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-2xl border border-gray-100 "
                         >
                           <div className="flex items-center gap-3">
-                            {/* Name */}
+                            {/*name */}
                             <div>
                               <p className="font-semibold text-gray-900">
                                 {member.name}
@@ -655,7 +690,7 @@ export default function NewBillPage() {
                             </div>
                           </div>
 
-                          {/* Amount */}
+                          {/*amount */}
                           <div className="text-right">
                             <p className="text-xl font-bold text-blue-600">
                               $ {perPersonAmount}
@@ -678,9 +713,9 @@ export default function NewBillPage() {
                       />
                       Back
                     </button>
-                    {/*save btn */}
+                    {/*submit btn */}
                     <button
-                      onClick={handleSave}
+                      onClick={handleSubmit}
                       className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl "
                     >
                       Confirm & Create Bill

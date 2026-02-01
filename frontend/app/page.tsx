@@ -4,10 +4,17 @@ import Link from "next/link";
 import { Typewriter } from "react-simple-typewriter";
 
 export default function Home() {
+  const steps = [
+    {
+      step: 1,
+      title: "Upload Your Receipt",
+      desc: "Snap a photo or upload your bill. Our AI instantly extracts all the details!",
+    },
+  ];
   return (
-    <div>
+    <div className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth">
       {/*hero section */}
-      <main className="min-h-screen grid lg:grid-cols-2">
+      <main className="h-screen snap-start grid lg:grid-cols-2 overflow-hidden">
         {/*left section*/}
         <div className="flex flex-col items-center justify-center bg-white px-8 text-center">
           <Image
@@ -60,8 +67,8 @@ export default function Home() {
           </div>
         </div>
       </main>
-      {/*video */}
-      <section className="w-full bg-gradient-to-br from-violet-500 to-violet-700 py-20 px-6">
+      {/*steps */}
+      <section className="h-screen snap-start bg-gradient-to-br from-violet-400 to-indigo-700 py-20 px-6">
         <div className="max-w-6xl mx-auto flex flex-col items-center gap-8">
           {/* heading */}
           <h2 className="text-3xl sm:text-4xl font-bold text-white text-center">
