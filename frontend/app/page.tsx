@@ -8,7 +8,25 @@ export default function Home() {
     {
       step: 1,
       title: "Upload Your Receipt",
-      desc: "Snap a photo or upload your bill. Our AI instantly extracts all the details!",
+      desc: "Snap a photo or upload your bill. Our AI instantly extracts all the details needed!",
+      gradient: "from-blue-500 to-violet-600",
+      image: "/upload.png",
+    },
+    {
+      step: 2,
+      title: "Select Your Group",
+      description:
+        "Choose who's splitting the bill. Create groups for friends, roommates, or coworkers.",
+      gradient: "from-purple-500 to-pink-600",
+      image: "/group.png",
+    },
+    {
+      step: 3,
+      title: "Done! Everyone Gets Notified",
+      description:
+        "Review your split, confirm, and everyone gets notified instantly with their exact amount. No more chasing payments.",
+      gradient: "from-orange-400 to-red-600",
+      image: "/confirm.png",
     },
   ];
   return (
@@ -68,6 +86,50 @@ export default function Home() {
         </div>
       </main>
       {/*steps */}
+      {steps.map((step, index) => {
+        const isEven = index % 2 === 0;
+        return (
+          <section
+            key={step.step}
+            className={`h-screen snap-start flex items-center justify-center bg-gradient-to-br ${
+              isEven ? "from-white to-blue-50" : "from-blue-50 to-indigo-50"
+            } relative overflow-hidden`}
+          >
+            {/*background */}
+            <div className="absolute inset-0 opacity-10">
+              <div
+                className={`absolute ${
+                  isEven ? "top-10 right-10" : "bottom-10 left-10"
+                } w-96 h-96 bg-gradient-to-r ${
+                  step.gradient
+                } rounded-full blur-3xl`}
+              ></div>
+            </div>
+            <div className="container mx-auto px-6 z-10">
+              <div
+                className={`grid lg:grid-cols-2 gap-16 items-center ${
+                  !isEven && "lg:flex-row-reverse"
+                }`}
+              >
+                {/*image */}
+                <div className={`${!isEven && "lg:order-2"}`}>
+                  <div
+                    className={`relative bg-gradient-to-br ${step.gradient} rounded-3xl shadow-2xl p-12 aspect-square flex items-center justify-center transform hover:scale-105 transition-transform duration-300`}
+                  >
+                    <Image
+                      src={step.image}
+                      alt="upload and extract receipt"
+                      width={480}
+                      height={400}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      })}
+
       <section className="h-screen snap-start bg-gradient-to-br from-violet-400 to-indigo-700 py-20 px-6">
         <div className="max-w-6xl mx-auto flex flex-col items-center gap-8">
           {/* heading */}
