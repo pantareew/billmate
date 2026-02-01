@@ -44,6 +44,8 @@ export function useNotifications() {
           "Content-Type": "application/json",
         },
       });
+      //refetch unread notifications
+      await fetchNotifications();
       //update read in frontend thru state var
       setNotifications((prev) =>
         prev.map((notification) =>
