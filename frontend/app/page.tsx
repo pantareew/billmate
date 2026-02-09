@@ -120,6 +120,7 @@ export default function Home() {
             }}
           ></div>
         </div>
+        {/*container */}
         <div className="relative z-10 h-full max-w-8xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-10 h-full items-center">
             {/*left section*/}
@@ -153,14 +154,18 @@ export default function Home() {
                 </div>
                 {/*action btns */}
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 rounded-2xl font-bold text-lg shadow-2xl shadow-orange-500/30 hover:shadow-orange-500/50 transition-all duration-300 overflow-hidden">
+                  <Link
+                    href="/auth/signup"
+                    className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 rounded-2xl font-bold text-lg shadow-2xl shadow-orange-500/30 hover:shadow-orange-500/50 transition-all duration-300 overflow-hidden"
+                  >
                     Split a Bill
-                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                  </button>
-
-                  <button className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:bg-white/20 hover:border-white/50 rounded-2xl font-bold text-lg transition-all duration-300">
+                  </Link>
+                  <Link
+                    href="/auth/login"
+                    className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:bg-white/20 hover:border-white/50 rounded-2xl font-bold text-lg transition-all duration-300"
+                  >
                     Sign In
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -235,69 +240,9 @@ export default function Home() {
           </section>
         );
       })}
+
       {/*features */}
-      <section className="h-screen snap-start bg-gradient-to-br from-violet-400 to-indigo-700 py-20 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col items-center gap-8">
-          {/* heading */}
-          <h2 className="text-3xl sm:text-4xl font-bold text-white text-center">
-            See Billmate in action
-          </h2>
-          <p className="text-white/80 text-center max-w-xl">
-            Watch our founder walk you through how to streamline your billing
-            instantly
-          </p>
-          {/* video */}
-          <div className="relative w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl">
-            <video
-              src="/demo.mp4"
-              controls
-              muted
-              playsInline
-              poster="/thumbnail.png"
-              className="w-full h-auto rounded-2xl"
-            />
-          </div>
-        </div>
-      </section>
-      {/*future features */}
-      <section className="w-full bg-gradient-to-br from-violet-500 to-violet-700 py-20 px-6">
-        <div className="max-w-lg lg:max-w-6xl mx-auto text-center text-white">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            More powerful features on the way
-          </h2>
-          <p className="text-white/80 max-w-2xl mx-auto mb-12">
-            We're building smarter tools to make bill sharing effortless
-          </p>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/*feature 1 */}
-            <div className="bg-white/10 backdrop-blur rounded-2xl p-6">
-              <h3 className="text-xl font-semibold mb-2">Per-item split</h3>
-              <p className="text-white/80 text-sm">
-                Split items individually instead of evenly
-              </p>
-            </div>
-
-            {/*feature 2 */}
-            <div className="bg-white/10 backdrop-blur rounded-2xl p-6">
-              <h3 className="text-xl font-semibold mb-2">
-                Receipt-based split suggestions
-              </h3>
-              <p className="text-white/80 text-sm">
-                Let AI suggest splits based on receipts
-              </p>
-            </div>
-
-            {/*feature 3 */}
-            <div className="bg-white/10 backdrop-blur rounded-2xl p-6">
-              <h3 className="text-xl font-semibold mb-2">Spending charts</h3>
-              <p className="text-white/80 text-sm">
-                Visualise your spending over time
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <section className="h-screen snap-start"></section>
       <footer className="bg-gray-50 border-t py-4 px-6 text-sm text-gray-500 text-center">
         <p>
           © {new Date().getFullYear()} Billmate. All rights reserved. Follow us
