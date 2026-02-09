@@ -112,13 +112,59 @@ export default function Home() {
         {/*glowing circle */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
-            className="absolute w-96 h-96 bg-purple-500 rounded-full blur-3xl opacity-20 animate-pulse"
+            className="absolute w-96 h-96 bg-purple-500 rounded-full blur-3xl opacity-20"
             style={{
               transform: `translate(${mousePosition.x - 192}px, ${
                 mousePosition.y - 192
               }px)`,
             }}
           ></div>
+        </div>
+        <div className="relative z-10 h-full max-w-8xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="grid lg:grid-cols-2 gap-10 h-full items-center">
+            {/*left section*/}
+            <div className="space-y-12 text-white">
+              {/*logo*/}
+              <div className="inline-block">
+                <Image
+                  src="/logo-main.png"
+                  alt="Logo"
+                  width={180}
+                  height={100}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="space-y-4">
+                <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-tight">
+                  Say goodbye to
+                </h2>
+                <div className="h-32 sm:h-36">
+                  <span className="text-4xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-orange-400 via-pink-400 to-purple-400 bg-clip-text text-transparent italic">
+                    <Typewriter
+                      words={words}
+                      loop
+                      cursor
+                      cursorStyle="|"
+                      typeSpeed={90}
+                      deleteSpeed={50}
+                      delaySpeed={1800}
+                    />
+                  </span>
+                </div>
+                {/*action btns */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 rounded-2xl font-bold text-lg shadow-2xl shadow-orange-500/30 hover:shadow-orange-500/50 transition-all duration-300 overflow-hidden">
+                    Split a Bill
+                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                  </button>
+
+                  <button className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:bg-white/20 hover:border-white/50 rounded-2xl font-bold text-lg transition-all duration-300">
+                    Sign In
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
       {/*steps */}
