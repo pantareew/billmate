@@ -8,7 +8,8 @@ export default function Home() {
     {
       step: 1,
       title: "Upload Your Receipt",
-      desc: "Snap a photo or upload your bill. Our AI instantly extracts all the details needed!",
+      description:
+        "Snap a photo or upload your bill. Our AI instantly extracts all the details needed!",
       gradient: "from-blue-500 to-violet-600",
       image: "/upload.png",
     },
@@ -24,7 +25,7 @@ export default function Home() {
       step: 3,
       title: "Done! Everyone Gets Notified",
       description:
-        "Review your split, confirm, and everyone gets notified instantly with their exact amount. No more chasing payments.",
+        "Review your split, confirm, and everyone gets notified instantly with their exact amount.",
       gradient: "from-orange-400 to-red-600",
       image: "/confirm.png",
     },
@@ -95,33 +96,57 @@ export default function Home() {
               isEven ? "from-white to-blue-50" : "from-blue-50 to-indigo-50"
             } relative overflow-hidden`}
           >
-            {/*background */}
-            <div className="absolute inset-0 opacity-10">
-              <div
-                className={`absolute ${
-                  isEven ? "top-10 right-10" : "bottom-10 left-10"
-                } w-96 h-96 bg-gradient-to-r ${
-                  step.gradient
-                } rounded-full blur-3xl`}
-              ></div>
-            </div>
             <div className="container mx-auto px-6 z-10">
               <div
-                className={`grid lg:grid-cols-2 gap-16 items-center ${
+                className={`grid lg:grid-cols-2 gap-10 items-center ${
                   !isEven && "lg:flex-row-reverse"
                 }`}
               >
-                {/*image */}
+                {/*image container */}
                 <div className={`${!isEven && "lg:order-2"}`}>
+                  {/*background container */}
                   <div
                     className={`relative bg-gradient-to-br ${step.gradient} rounded-3xl shadow-2xl p-12 aspect-square flex items-center justify-center transform hover:scale-105 transition-transform duration-300`}
                   >
                     <Image
                       src={step.image}
-                      alt="upload and extract receipt"
+                      alt={step.title}
                       width={480}
                       height={400}
+                      className="rounded-3xl"
                     />
+                  </div>
+                </div>
+                {/*content */}
+                <div>
+                  <div className={`space-y-6 ${!isEven && "lg:order-1"}`}>
+                    <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border-2 border-gray-200">
+                      <span
+                        className={`w-2 h-2 bg-gradient-to-r ${step.gradient} rounded-full`}
+                      ></span>
+                      <span className="text-sm font-bold text-gray-600">
+                        STEP {step.step}
+                      </span>
+                    </div>
+                    <h2 className="text-5xl font-bold text-gray-900 lg:leading-tight">
+                      {step.title}
+                    </h2>
+                    <p className="text-2xl text-gray-600 leading-relaxed">
+                      {step.description}
+                    </p>
+                    {/*progress indicator */}
+                    <div className="flex items-center gap-3 pt-4">
+                      {steps.map((_, i) => (
+                        <div
+                          key={i}
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            i === index
+                              ? `w-12 bg-gradient-to-r ${step.gradient}`
+                              : "w-2 bg-gray-300"
+                          }`}
+                        ></div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
