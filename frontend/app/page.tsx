@@ -205,10 +205,10 @@ export default function Home() {
                 <div className="absolute top-32 right-0 w-80 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-2xl p-6 rotate-[6deg] hover:rotate-[3deg] transition-all duration-500 hover:scale-105 cursor-pointer">
                   <div className="text-white">
                     <div className="flex items-center gap-2 mb-4">
-                      <p className="font-bold">Split Comfirm</p>
+                      <p className="font-bold">Split Comfirmed</p>
                     </div>
                     <div className="space-y-3">
-                      {["Alex", "Sarah", "Mike"].map((name, i) => (
+                      {["Lisa", "Kim", "Harry"].map((name, i) => (
                         <div
                           key={i}
                           className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-xl p-3"
@@ -222,9 +222,6 @@ export default function Home() {
                           <span className="font-bold text-lg">$28.17</span>
                         </div>
                       ))}
-                    </div>
-                    <div className="mt-4 flex items-center gap-2 text-sm bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                      <span>Everyone notified ✓</span>
                     </div>
                   </div>
                 </div>
