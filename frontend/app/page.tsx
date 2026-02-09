@@ -169,6 +169,81 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            {/*right section*/}
+            <div className="relative hidden lg:block">
+              {/*cards*/}
+              <div className="relative h-[600px]">
+                {/*receipt card*/}
+                <div className="absolute top-0 left-12 w-72 bg-white rounded-3xl shadow-2xl p-6 rotate-[-8deg] hover:rotate-[-4deg] transition-all duration-500 hover:scale-105 cursor-pointer">
+                  <div className="flex items-center gap-3 mb-4">
+                    <p className="font-bold text-gray-900">Vapiano Italian</p>
+                  </div>
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Pasta</span>
+                      <span className="font-semibold">$28.50</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Pizza</span>
+                      <span className="font-semibold">$32.00</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Beers</span>
+                      <span className="font-semibold">$24.00</span>
+                    </div>
+                    <div className="border-t pt-2 flex justify-between font-bold">
+                      <span>Total</span>
+                      <span className="text-blue-600">$84.50</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+                    <span className="font-semibold">AI Extracted ✓</span>
+                  </div>
+                </div>
+
+                {/*split card*/}
+                <div className="absolute top-32 right-0 w-80 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-2xl p-6 rotate-[6deg] hover:rotate-[3deg] transition-all duration-500 hover:scale-105 cursor-pointer">
+                  <div className="text-white">
+                    <div className="flex items-center gap-2 mb-4">
+                      <p className="font-bold">Split Comfirm</p>
+                    </div>
+                    <div className="space-y-3">
+                      {["Alex", "Sarah", "Mike"].map((name, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-xl p-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold">
+                              {name[0]}
+                            </div>
+                            <span className="font-medium">{name}</span>
+                          </div>
+                          <span className="font-bold text-lg">$28.17</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-4 flex items-center gap-2 text-sm bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+                      <span>Everyone notified ✓</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/*spending card*/}
+                <div className="absolute bottom-0 left-24 w-64 bg-white rounded-3xl shadow-2xl p-6 rotate-[4deg] hover:rotate-[2deg] transition-all duration-500 hover:scale-105 cursor-pointer">
+                  <p className="text-sm text-gray-500 mb-2">This Month</p>
+                  <p className="text-4xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+                    $1,450
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Bills split</span>
+                      <span className="font-bold">23</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
