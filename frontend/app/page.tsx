@@ -1,9 +1,24 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { Typewriter } from "react-simple-typewriter";
 
 export default function Home() {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
+  {
+    /*hero keywords */
+  }
+  const words = [
+    "awkward money talks",
+    "calculator math",
+    "chasing payments",
+    "receipt confusion",
+  ];
+  {
+    /*how it works steps */
+  }
   const steps = [
     {
       step: 1,
@@ -30,60 +45,80 @@ export default function Home() {
       image: "/confirm.png",
     },
   ];
-  return (
-    <div className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth">
-      {/*hero section */}
-      <main className="h-screen snap-start grid lg:grid-cols-2 overflow-hidden">
-        {/*left section*/}
-        <div className="flex flex-col items-center justify-center bg-white px-8 text-center">
-          <Image
-            src="/logo.png"
-            alt="App logo"
-            width={200}
-            height={200}
-            className="mb-3"
-          />
-          <p className="text-xl text-gray-400 mb-3">
-            sharing expenses made simple
-          </p>
-        </div>
-        {/*right section */}
-        <div className=" flex flex-col items-center justify-center bg-gradient-to-br from-violet-600 to-[#ea6149] px-8 text-white">
-          <h2 className="text-2xl sm:text-3xl mb-6 text-center leading-snug ">
-            Say goodbye to{" "}
-            <span className="italic font-semibold">
-              <Typewriter
-                words={[
-                  "splitting bills manually",
-                  "tracking debts in chats",
-                  "doing post-hangout math",
-                  "manually reading receipts",
-                ]}
-                loop
-                cursor
-                cursorStyle="|"
-                typeSpeed={90}
-                deleteSpeed={50}
-                delaySpeed={1800}
-              />
-            </span>
-          </h2>
-          {/*action buttons */}
-          <div className="flex gap-4 mt-4">
-            <Link
-              href="/auth/signup"
-              className="bg-white text-violet-600 px-6 py-2 rounded-full font-semibold hover:bg-gray-200 transition"
-            >
-              Try Billmate
-            </Link>
+  {
+    /*features */
+  }
+  const features = [
+    {
+      title: "AI Receipt Scanning",
+      description:
+        "Snap a photo. AI extracts items, totals, and merchant name in seconds. No manual entry.",
+      stat: "94% accuracy",
+      image: "/ai.png",
+      gradient: "from-blue-500 to-indigo-600",
+    },
+    {
+      title: "Smart Split Options",
+      description: "Split evenly or by item. Perfect for any scenario",
+      stat: "Two flexible splitting options",
+      image: "/options.png",
+      gradient: "from-purple-500 to-pink-600",
+    },
+    {
+      title: "Payment Tracking",
+      description:
+        "See who owes what and who's paid. Mark payments and keep everyone accountable.",
+      stat: "Real-time updates",
+      image: "/tracking.png",
+      gradient: "from-emerald-500 to-teal-600",
+    },
+    {
+      title: "Group Management",
+      description:
+        "Create groups for roommates, friends, or coworkers. Perfect for rent, utilities, or weekly dinners.",
+      stat: "Reuse for recurring bills",
+      image: "/group.png",
+      gradient: "from-emerald-500 to-teal-600",
+    },
+  ];
 
-            <Link
-              href="/auth/login"
-              className="border border-white px-6 py-2 rounded-full font-semibold hover:bg-white/20 transition"
-            >
-              Login
-            </Link>
-          </div>
+  {
+    /*mouse move */
+  }
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+
+      const rect = containerRef.current.getBoundingClientRect();
+
+      setMousePosition({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
+    >
+      {/*hero section */}
+      <main className="relative snap-start h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+        {/*glowing circle */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div
+            className="absolute w-96 h-96 bg-purple-500 rounded-full blur-3xl opacity-20 animate-pulse"
+            style={{
+              transform: `translate(${mousePosition.x - 192}px, ${
+                mousePosition.y - 192
+              }px)`,
+            }}
+          ></div>
         </div>
       </main>
       {/*steps */}
@@ -154,7 +189,7 @@ export default function Home() {
           </section>
         );
       })}
-
+      {/*features */}
       <section className="h-screen snap-start bg-gradient-to-br from-violet-400 to-indigo-700 py-20 px-6">
         <div className="max-w-6xl mx-auto flex flex-col items-center gap-8">
           {/* heading */}
@@ -175,113 +210,6 @@ export default function Home() {
               poster="/thumbnail.png"
               className="w-full h-auto rounded-2xl"
             />
-          </div>
-        </div>
-      </section>
-      {/*how it works */}
-      <section className="bg-white py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">
-            How it works
-          </h2>
-          {/*steps */}
-          <div className="grid gap-12 lg:grid-cols-3">
-            {/*step 1 */}
-            <div className="flex flex-col items-center text-center">
-              {/*frame */}
-              <div
-                className="w-72 h-96 bg-white rounded-2xl shadow-md 
-                          flex items-center justify-center mb-6"
-              >
-                <Image
-                  src="/upload.png"
-                  alt="upload and extract receipt"
-                  width={400}
-                  height={380}
-                />
-              </div>
-
-              <div className="flex items-center gap-3 mb-2">
-                <span
-                  className="w-7 h-7 rounded-full bg-violet-600 text-white 
-                 text-sm font-semibold flex items-center justify-center"
-                >
-                  1
-                </span>
-                <h3 className="font-semibold text-lg text-gray-900">
-                  Upload a bill
-                </h3>
-              </div>
-              <p className="mt-2 text-sm text-gray-500 max-w-xs">
-                Our AI reads and extracts merchant name and totals from your
-                bill
-              </p>
-            </div>
-
-            {/*step 2 */}
-            <div className="flex flex-col items-center text-center">
-              {/*frame */}
-              <div
-                className="w-72 h-96 bg-white rounded-2xl shadow-md 
-                          flex items-center justify-center mb-6"
-              >
-                <Image
-                  src="/group.png"
-                  alt="group and member selection"
-                  width={400}
-                  height={350}
-                />
-              </div>
-
-              <div className="flex items-center gap-3 mb-2">
-                <span
-                  className="w-7 h-7 rounded-full bg-violet-600 text-white 
-                 text-sm font-semibold flex items-center justify-center"
-                >
-                  2
-                </span>
-
-                <h3 className="font-semibold text-lg text-gray-900">
-                  Choose your group
-                </h3>
-              </div>
-              <p className="mt-2 text-sm text-gray-500 max-w-xs">
-                Select the group and members involved in the bill
-              </p>
-            </div>
-
-            {/*step 3 */}
-            <div className="flex flex-col items-center text-center">
-              {/*frame */}
-              <div
-                className="relative w-72 h-96 bg-white rounded-2xl shadow-md 
-                          flex items-center justify-center mb-6"
-              >
-                <Image
-                  src="/view.png"
-                  alt="view dashboard"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-
-              <div className="flex items-center gap-3 mb-2">
-                <span
-                  className="w-7 h-7 rounded-full bg-violet-600 text-white 
-                 text-sm font-semibold flex items-center justify-center"
-                >
-                  3
-                </span>
-
-                <h3 className="font-semibold text-lg text-gray-900">
-                  Track payments
-                </h3>
-              </div>
-              <p className="mt-2 text-sm text-gray-500 max-w-xs">
-                See who owes what and payment status at a glance on dashboard
-                page
-              </p>
-            </div>
           </div>
         </div>
       </section>
