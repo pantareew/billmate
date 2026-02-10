@@ -286,10 +286,10 @@ export default function Home() {
                         STEP {step.step}
                       </span>
                     </div>
-                    <h2 className="text-5xl font-bold text-gray-900 lg:leading-tight">
+                    <h2 className="text-3xl xl:text-5xl font-bold text-gray-900 lg:leading-tight">
                       {step.title}
                     </h2>
-                    <p className="text-2xl text-gray-600 leading-relaxed">
+                    <p className="hidden xl:block xl:text-2xl text-gray-600 leading-relaxed">
                       {step.description}
                     </p>
                     {/*progress indicator */}
@@ -314,7 +314,7 @@ export default function Home() {
       })}
 
       {/*features */}
-      <section className="min-h-screen snap-start bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-20 px-6">
+      <section className="min-h-screen snap-end bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-20 px-6">
         <div className="max-w-7xl mx-auto">
           {/*header */}
           <div className="text-center mb-16">
@@ -351,7 +351,7 @@ export default function Home() {
                       <Image
                         src={feature.image}
                         alt={feature.title}
-                        width={400}
+                        width={600}
                         height={400}
                         className="rounded"
                       />
