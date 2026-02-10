@@ -314,7 +314,7 @@ export default function Home() {
       })}
 
       {/*features */}
-      <section className="min-h-screen snap-start bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-20 px-6">
+      <section className="min-h-screen snap-start bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-15 px-6">
         <div className="max-w-7xl mx-auto">
           {/*header */}
           <div className="text-center mb-16">
@@ -384,8 +384,37 @@ export default function Home() {
           </div>
         </div>
       </section>
-      {/*footer */}
-      <section className="snap-end"></section>
+      {/*cta */}
+      <section className="relative snap-end h-1/2 flex items-center justify-center overflow-hidden bg-gradient-to-tr from-blue-900 via-indigo-900 to-purple-900">
+        {/*bg glow*/}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/2 left-1/2 w-[500px] h-[500px] -translate-x-1/2 -translate-y-1/2 bg-purple-500/30 rounded-full blur-3xl"></div>
+        </div>
+        {/*content */}
+        <div className="relative z-10 text-center space-y-10 px-6">
+          {/*heading */}
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
+            Ready to simplify your expenses?
+          </h2>
+          {/*link to sign up*/}
+          <Link
+            href="/auth/signup"
+            className="
+        inline-flex items-center justify-center
+        px-8 py-3
+        rounded-full
+        bg-gradient-to-r from-orange-400 via-pink-400 to-purple-500
+        text-white font-bold text-lg
+        shadow-lg
+        hover:shadow-2xl
+        hover:scale-105
+        transition-all duration-300
+      "
+          >
+            Try BillMate Free 🡪
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }
