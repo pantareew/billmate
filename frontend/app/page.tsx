@@ -52,7 +52,7 @@ export default function Home() {
     {
       title: "AI Receipt Scanning",
       description:
-        "Snap a photo. AI extracts items, totals, and merchant name in seconds. No manual entry.",
+        "Snap a photo. AI extracts details in seconds. No manual entry.",
       stat: "94% accuracy",
       image: "/ai.png",
       gradient: "from-blue-500 to-indigo-600",
@@ -77,7 +77,7 @@ export default function Home() {
       description:
         "Create groups for roommates, friends, or coworkers. Perfect for rent, utilities, or weekly dinners.",
       stat: "Reuse for recurring bills",
-      image: "/group.png",
+      image: "/group-feature.png",
       gradient: "from-orange-500 to-red-600",
     },
   ];
@@ -314,7 +314,7 @@ export default function Home() {
       })}
 
       {/*features */}
-      <section className="h-screen snap-start bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-20 px-6">
+      <section className="min-h-screen snap-start bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-20 px-6">
         <div className="max-w-7xl mx-auto">
           {/*header */}
           <div className="text-center mb-16">
@@ -347,6 +347,18 @@ export default function Home() {
                           </div>
                         </div>
                       </div>
+                      {/*image */}
+                      <Image
+                        src={feature.image}
+                        alt={feature.title}
+                        width={400}
+                        height={400}
+                        className="rounded"
+                      />
+                      {/*desc */}
+                      <p className="text-gray-700 text-lg leading-relaxed">
+                        {feature.description}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -355,18 +367,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <footer className="bg-gray-50 border-t py-4 px-6 text-sm text-gray-500 text-center">
-        <p>
-          © {new Date().getFullYear()} Billmate. All rights reserved. Follow us
-          on{" "}
-          <a
-            href="http://linkedin.com/company/billmateandmore/about/"
-            className="text-violet-500 hover:text-violet-600"
-          >
-            Linkedin
-          </a>
-        </p>
-      </footer>
     </div>
   );
 }
