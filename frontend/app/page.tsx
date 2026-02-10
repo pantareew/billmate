@@ -1,5 +1,4 @@
 "use client";
-import { Sparkle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -334,6 +333,21 @@ export default function Home() {
                     <div
                       className={`h-2 bg-gradient-to-r ${feature.gradient}`}
                     ></div>
+                    <div className="p-8 space-y-6">
+                      {/*title */}
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                            {feature.title}
+                          </h3>
+                          <div
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r ${feature.gradient} text-white shadow-sm`}
+                          >
+                            {feature.stat}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
