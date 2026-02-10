@@ -1,5 +1,5 @@
 "use client";
-import { Zap, Sparkle } from "lucide-react";
+import { Sparkle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -79,7 +79,7 @@ export default function Home() {
         "Create groups for roommates, friends, or coworkers. Perfect for rent, utilities, or weekly dinners.",
       stat: "Reuse for recurring bills",
       image: "/group.png",
-      gradient: "from-emerald-500 to-teal-600",
+      gradient: "from-orange-500 to-red-600",
     },
   ];
 
@@ -322,6 +322,22 @@ export default function Home() {
             <span className="inline-flex items-center gap-2 bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900  px-6 py-3 rounded-full  shadow-sm text-sm text-white/90 font-bold uppercase tracking-wide">
               Features
             </span>
+          </div>
+          {/*features grid */}
+          <div className="grid md:grid-cols-2 gap-8">
+            {features.map((feature, index) => {
+              return (
+                <div key={index} className="group relative">
+                  {/*card */}
+                  <div className="relative bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden border-2 border-gray-100 group-hover:border-transparent">
+                    {/*gradient bar */}
+                    <div
+                      className={`h-2 bg-gradient-to-r ${feature.gradient}`}
+                    ></div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
