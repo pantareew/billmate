@@ -1,4 +1,5 @@
 "use client";
+import { Zap, Sparkle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -196,13 +197,13 @@ export default function Home() {
                       <span className="text-blue-600">$84.50</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+                  <div className="flex items-center gap-2 text-xs text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg">
                     <span className="font-semibold">AI Extracted ✓</span>
                   </div>
                 </div>
 
                 {/*split card*/}
-                <div className="absolute top-32 right-0 w-80 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-2xl p-6 rotate-[6deg] hover:rotate-[3deg] transition-all duration-500 hover:scale-105 cursor-pointer">
+                <div className="absolute top-32 right-0 w-80 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-3xl shadow-2xl p-6 rotate-[6deg] hover:rotate-[3deg] transition-all duration-500 hover:scale-105 cursor-pointer">
                   <div className="text-white">
                     <div className="flex items-center gap-2 mb-4">
                       <p className="font-bold">Split Comfirmed</p>
@@ -314,7 +315,16 @@ export default function Home() {
       })}
 
       {/*features */}
-      <section className="h-screen snap-start"></section>
+      <section className="h-screen snap-start bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          {/*header */}
+          <div className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900  px-6 py-3 rounded-full  shadow-sm text-sm text-white/90 font-bold uppercase tracking-wide">
+              Features
+            </span>
+          </div>
+        </div>
+      </section>
       <footer className="bg-gray-50 border-t py-4 px-6 text-sm text-gray-500 text-center">
         <p>
           © {new Date().getFullYear()} Billmate. All rights reserved. Follow us
