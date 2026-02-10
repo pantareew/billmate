@@ -314,7 +314,7 @@ export default function Home() {
       })}
 
       {/*features */}
-      <section className="min-h-screen snap-end bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-20 px-6">
+      <section className="min-h-screen snap-start bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-20 px-6">
         <div className="max-w-7xl mx-auto">
           {/*header */}
           <div className="text-center mb-16">
@@ -347,14 +347,31 @@ export default function Home() {
                           </div>
                         </div>
                       </div>
-                      {/*image */}
-                      <Image
-                        src={feature.image}
-                        alt={feature.title}
-                        width={600}
-                        height={400}
-                        className="rounded"
-                      />
+                      {/*hover to see image for desktop */}
+                      <div
+                        className="    
+    w-full 
+    overflow-hidden
+    max-h-full 
+    opacity-100
+    md:max-h-0
+    md:opacity-0
+    md:group-hover:max-h-full
+    md:group-hover:opacity-100
+    transition-all 
+    duration-100 
+    ease-out
+  "
+                      >
+                        {/*image */}
+                        <Image
+                          src={feature.image}
+                          alt={feature.title}
+                          width={600}
+                          height={400}
+                          className="rounded"
+                        />
+                      </div>
                       {/*desc */}
                       <p className="text-gray-700 text-lg leading-relaxed">
                         {feature.description}
@@ -367,6 +384,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+      {/*footer */}
+      <section className="snap-end"></section>
     </div>
   );
 }
