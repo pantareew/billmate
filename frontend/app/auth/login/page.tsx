@@ -34,11 +34,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
+      {/*left section */}
       <div
         className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-slate-800 via-purple-800 to-indigo-800
  relative overflow-hidden"
       >
-        {/*content */}
         <div className="relative z-10 flex flex-col justify-center px-16 text-white">
           {/*logo */}
           <div className="mb-8">
@@ -65,7 +65,7 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-      {/*login form */}
+      {/*right section*/}
       <div className="flex-1 flex items-center justify-center bg-gray-50 p-8">
         <div className="w-full max-w-md">
           {/*mobile logo */}
@@ -91,7 +91,7 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/*form */}
+            {/*login form */}
             <form onSubmit={handleLogin} className="space-y-5">
               {/*email input */}
               <div className="space-y-2">

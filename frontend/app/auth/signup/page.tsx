@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
-import { Sparkles } from "lucide-react";
+import { Sparkles, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -10,9 +10,13 @@ export default function SignupPage() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
+    setIsLoading(true);
+    setError("");
     //create user in auth.users
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -24,7 +28,8 @@ export default function SignupPage() {
       },
     });
     if (error) {
-      alert(error.message);
+      setError(error.message);
+      setIsLoading(false);
       return;
     }
     //check for valid user before inserting into public.users
@@ -41,126 +46,117 @@ export default function SignupPage() {
     }
   }
   return (
-    <div className="min-h-screen flex items-center justify-center grid grid-cols-1 xl:grid-cols-2">
-      {/*left visual section */}
-      <div className="hidden xl:flex bg-gradient-to-br from-violet-600 to-[#ea6149] text-white p-10 xl:h-full">
-        <LeftVisual />
-      </div>
-      {/*signup form */}
-      <div className="flex items-center justify-center bg-gray-50">
-        <form
-          onSubmit={handleSignup}
-          className="w-full max-w-md bg-white p-8 rounded-xl shadow-md flex flex-col gap-4"
-        >
-          <Link href={"/"}>
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={150}
-              height={150}
-              className="mx-auto mb-4"
-            />
-          </Link>
-          <input
-            type="text"
-            placeholder="Display Name"
-            className="border border-[#6e3fe6] p-2 rounded-md"
-            onChange={(e) => setDisplayName(e.target.value)}
-            required
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            className="border border-[#6e3fe6] p-2 rounded-md"
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="border border-[#6e3fe6] p-2 rounded-md"
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button className="bg-violet-600 hover:bg-violet-700 text-white rounded-md py-2 font-semibold cursor-pointer">
-            Sign up
-          </button>
-          <p>
-            Already a member?{" "}
-            <Link
-              href={"/auth/login"}
-              className="font-semibold text-violet-500 hover:text-violet-600"
-            >
-              Login Now
+    <div className="min-h-screen flex">
+      {/*left section */}
+      <div
+        className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-slate-800 via-purple-800 to-indigo-800
+ relative overflow-hidden"
+      >
+        <div className="relative z-10 flex flex-col justify-center px-16 text-white">
+          {/*logo */}
+          <div className="mb-8">
+            <Link href={"/"}>
+              <Image src="/logo-main.png" alt="Logo" width={150} height={150} />
             </Link>
+          </div>
+
+          {/*headline */}
+          <h1 className="text-5xl font-black leading-tight mb-6">
+            Split bills
+            <br />
+            Track debts
+            <br />
+            <span className="flex items-center gap-3 bg-gradient-to-r from-orange-300 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+              Powered by AI
+              <Sparkles size={32} className="text-pink-300" />
+            </span>
+          </h1>
+
+          <p className="text-xl text-gray-100 mb-12 max-w-md">
+            The smart way to split expenses with friends, roommates, and
+            colleagues
           </p>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-function LeftVisual() {
-  return (
-    <div className="max-w-md flex flex-col justify-center gap-8">
-      <h2 className="text-3xl font-bold leading-tight">
-        Split bills
-        <br />
-        Track debts
-        <br />
-        <span className="flex items-center">
-          Processed by AI <Sparkles size={25} className="mx-3" />
-        </span>
-      </h2>
-      <div className="flex gap-10">
-        {/*receipt */}
-        <div className="bg-white/10 p-5 rounded-xl flex-1 space-y-3 min-w-[300px] space-y-3">
-          <p className="font-semibold text-white text-lg">Gigi's Party</p>
-          <p className="text-sm text-gray-200">12/12/2025</p>
-          <div className="border-t border-white/30 pt-2 space-y-1">
-            <div className="flex justify-between text-white text-sm">
-              <span>Pizzas</span>
-              <span>$45.00</span>
-            </div>
-            <div className="flex justify-between text-white text-sm">
-              <span>Coca Cola</span>
-              <span>$20</span>
-            </div>
-            <div className="flex justify-between text-white text-sm">
-              <span>Garlic Bread</span>
-              <span>$24.50</span>
-            </div>
-          </div>
-          <div className="border-t border-white/50 pt-2 flex justify-between font-semibold text-white">
-            <span>Total</span>
-            <span>$89.50</span>
-          </div>
-        </div>
-        {/*charts */}
-        <div className="bg-white/10 p-5 rounded-xl space-y-4 flex-1 space-y-3 min-w-[300px]">
-          <TrackBar label="Chris owes you" value={26.5} />
-          <TrackBar label="You owe Ann" value={16.4} />
-          <TrackBar label="Movie night" value={38.0} />
         </div>
       </div>
-    </div>
-  );
-}
+      {/*right section*/}
+      <div className="flex-1 flex items-center justify-center bg-gray-50 p-8">
+        <div className="w-full max-w-md">
+          {/*mobile logo */}
+          <div className="lg:hidden mb-8 flex justify-center">
+            <Link href={"/"}>
+              <Image src="/logo-main.png" alt="Logo" width={150} height={150} />
+            </Link>
+          </div>
+          {/*form card */}
+          <div className="bg-white rounded-3xl shadow-xl border-2 border-gray-100 p-8 space-y-6">
+            {/*header */}
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl font-bold text-gray-900">Welcome!</h2>
+              <p className="text-gray-600">Let’s set up your account</p>
+            </div>
 
-function TrackBar({ label, value }: { label: string; value: number }) {
-  const maxValue = 50;
-  const widthPercent = Math.min((value / maxValue) * 100, 100);
-  return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-sm opacity-90">
-        <span>{label}</span>
-        <span>${value.toFixed(2)}</span>
-      </div>
-      <div className="h-2 bg-white/20 rounded-full">
-        <div
-          className="h-2 bg-white rounded-full"
-          style={{ width: `${widthPercent}%` }}
-        />
+            {/*error msg*/}
+            {error && (
+              <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex items-start gap-3">
+                <TriangleAlert size={20} />
+                <span>{error}</span>
+              </div>
+            )}
+            <form onSubmit={handleSignup} className="space-y-5">
+              {/*inputs */}
+              <input
+                type="text"
+                placeholder="Display Name"
+                value={displayName}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 outline-none transition-all text-gray-900 placeholder-gray-400"
+                onChange={(e) => setDisplayName(e.target.value)}
+                required
+              />
+              <input
+                type="email"
+                value={email}
+                placeholder="Email"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 outline-none transition-all text-gray-900 placeholder-gray-400"
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 outline-none transition-all text-gray-900 placeholder-gray-400"
+                required
+              />
+              {/*submit btn */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full group relative flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-br from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-xl transition-all duration-300 overflow-hidden"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Creating an account...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Create an account</span>
+                  </>
+                )}
+              </button>
+              <p className="text-gray-700">
+                Already a member?
+                <Link
+                  href={"/auth/login"}
+                  className="font-semibold text-violet-500 hover:text-indigo-700 px-2"
+                >
+                  Sign in
+                </Link>
+              </p>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );
