@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Sparkles } from "lucide-react";
+import { Sparkles, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -68,39 +68,32 @@ export default function LoginPage() {
       {/*login form */}
       <div className="flex-1 flex items-center justify-center bg-gray-50 p-8">
         <div className="w-full max-w-md">
-          {/* Mobile Logo */}
-          <div className="lg:hidden mb-8 text-center">
-            <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-2xl border-2 border-gray-200 shadow-sm">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-2xl">
-                💳
-              </div>
-              <span className="text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                BillMate
-              </span>
-            </div>
+          {/*mobile logo */}
+          <div className="lg:hidden mb-8 flex justify-center">
+            <Link href={"/"}>
+              <Image src="/logo-main.png" alt="Logo" width={150} height={150} />
+            </Link>
           </div>
 
-          {/* Form Card */}
+          {/*form card */}
           <div className="bg-white rounded-3xl shadow-xl border-2 border-gray-100 p-8 space-y-6">
-            {/* Header */}
+            {/*header */}
             <div className="text-center space-y-2">
               <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
-              <p className="text-gray-600">
-                Sign in to continue splitting bills
-              </p>
+              <p className="text-gray-600">Sign in to continue</p>
             </div>
 
-            {/* Error Message */}
+            {/*error msg*/}
             {error && (
               <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex items-start gap-3">
-                <span className="text-lg">⚠️</span>
+                <TriangleAlert size={20} />
                 <span>{error}</span>
               </div>
             )}
 
-            {/* Form */}
+            {/*form */}
             <form onSubmit={handleLogin} className="space-y-5">
-              {/* Email Input */}
+              {/*email input */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">
                   Email address
@@ -110,12 +103,12 @@ export default function LoginPage() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-gray-900 placeholder-gray-400"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 outline-none transition-all text-gray-900 placeholder-gray-400"
                   required
                 />
               </div>
 
-              {/* Password Input */}
+              {/*password input */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">
                   Password
@@ -126,34 +119,17 @@ export default function LoginPage() {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-gray-900 placeholder-gray-400"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 outline-none transition-all text-gray-900 placeholder-gray-400"
                     required
                   />
                 </div>
               </div>
 
-              {/* Remember & Forgot */}
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-600">Remember me</span>
-                </label>
-                <a
-                  href="#"
-                  className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-                >
-                  Forgot password?
-                </a>
-              </div>
-
-              {/* Submit Button */}
+              {/*submit btn */}
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full group relative flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 disabled:shadow-none transition-all duration-300 overflow-hidden"
+                className="w-full group relative flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-br from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-xl transition-all duration-300 overflow-hidden"
               >
                 {isLoading ? (
                   <>
@@ -165,12 +141,11 @@ export default function LoginPage() {
                     <span>Sign in</span>
                   </>
                 )}
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
               </button>
             </form>
-
-            {/* Divider */}
+            {/*divider */}
             <div className="relative">
+              {/*horizontal line */}
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
               </div>
@@ -181,7 +156,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Sign Up Link */}
+            {/*link to sign up*/}
             <div className="text-center">
               <a
                 href="/auth/signup"
@@ -190,35 +165,7 @@ export default function LoginPage() {
                 Create an account
               </a>
             </div>
-
-            {/* Trust Badges */}
-            <div className="pt-4 flex items-center justify-center gap-6 text-xs text-gray-500">
-              <div className="flex items-center gap-1">
-                <span>🔒</span>
-                <span>Secure</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span>⚡</span>
-                <span>Fast</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span>✓</span>
-                <span>Trusted</span>
-              </div>
-            </div>
           </div>
-
-          {/* Terms */}
-          <p className="text-center text-xs text-gray-500 mt-6">
-            By signing in, you agree to our{" "}
-            <a href="#" className="text-blue-600 hover:underline">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="#" className="text-blue-600 hover:underline">
-              Privacy Policy
-            </a>
-          </p>
         </div>
       </div>
     </div>
