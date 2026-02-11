@@ -12,7 +12,7 @@ export default function MenuBar() {
   const inactiveClass = "text-gray-900";
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-white flex justify-around py-2 z-50 shadow-sm">
-      {/*Dashboard tab */}
+      {/*dashboard tab */}
       <button
         onClick={() => router.push("/dashboard")}
         className={`${baseClass} ${
@@ -22,7 +22,7 @@ export default function MenuBar() {
         <DollarSign size={22} />
         Dashboard
       </button>
-      {/*New Bill tab */}
+      {/*new bill tab */}
       <button
         onClick={() => router.push("/bills/new")}
         className={`${baseClass} ${
@@ -32,7 +32,7 @@ export default function MenuBar() {
         <Upload size={22} />
         New Bill
       </button>
-      {/*Groups tab */}
+      {/*groups tab */}
       <button
         onClick={() => router.push("/groups")}
         className={`${baseClass} ${

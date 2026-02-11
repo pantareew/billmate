@@ -21,7 +21,7 @@ export default function NavBar() {
             className="rounded-xl"
           />
           {currentUser && (
-            <div className="hidden md:flex items-center gap-2">
+            <div className="flex items-center gap-2">
               {/*notifications */}
               <div className="relative">
                 <button

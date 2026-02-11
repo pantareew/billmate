@@ -18,7 +18,7 @@ export default function NotificationsDropdown() {
     return date.toLocaleDateString();
   };
   return (
-    <div className="w-96 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="w-64 sm:w-96 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden">
       {/*header */}
       <div className="bg-gradient-to-r from-orange-50 to-red-50 border-b border-orange-100 p-4">
         <div className="flex items-center gap-2">
