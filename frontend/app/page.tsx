@@ -59,7 +59,7 @@ export default function Home() {
     },
     {
       title: "Smart Split Options",
-      description: "Split evenly or by item. Perfect for any scenario",
+      description: "Split evenly or by item. Perfect for any scenarios.",
       stat: "Two flexible splitting options",
       image: "/options.png",
       gradient: "from-purple-500 to-pink-600",
@@ -394,7 +394,7 @@ export default function Home() {
         <div className="relative z-10 text-center space-y-10 px-6">
           {/*heading */}
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
-            Ready to simplify your expenses?
+            Start splitting bills the easy way
           </h2>
           {/*link to sign up*/}
           <Link

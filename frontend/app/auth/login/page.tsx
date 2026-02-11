@@ -33,152 +33,193 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center grid grid-cols-1 xl:grid-cols-2">
-      {/*left visual section */}
-      <div className="hidden xl:flex bg-gradient-to-br from-violet-600 to-[#ea6149] text-white p-10 xl:h-full">
-        <LeftVisual />
+    <div className="min-h-screen flex">
+      <div
+        className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-slate-800 via-purple-800 to-indigo-800
+ relative overflow-hidden"
+      >
+        {/*content */}
+        <div className="relative z-10 flex flex-col justify-center px-16 text-white">
+          {/*logo */}
+          <div className="mb-8">
+            <Link href={"/"}>
+              <Image src="/logo-main.png" alt="Logo" width={150} height={150} />
+            </Link>
+          </div>
+
+          {/*headline */}
+          <h1 className="text-5xl font-black leading-tight mb-6">
+            Split bills
+            <br />
+            Track debts
+            <br />
+            <span className="flex items-center gap-3 bg-gradient-to-r from-orange-300 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+              Powered by AI
+              <Sparkles size={32} className="text-pink-300" />
+            </span>
+          </h1>
+
+          <p className="text-xl text-gray-100 mb-12 max-w-md">
+            The smart way to split expenses with friends, roommates, and
+            colleagues
+          </p>
+        </div>
       </div>
       {/*login form */}
-      <div className="flex items-center justify-center bg-gray-50">
-        <form
-          onSubmit={handleLogin}
-          className="w-full max-w-md bg-white p-8 rounded-xl shadow-md flex flex-col gap-4"
-        >
-          <Link href={"/"}>
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={150}
-              height={150}
-              className="mx-auto mb-4"
-            />
-          </Link>
-          {/*error message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-              {error}
+      <div className="flex-1 flex items-center justify-center bg-gray-50 p-8">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden mb-8 text-center">
+            <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-2xl border-2 border-gray-200 shadow-sm">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-2xl">
+                💳
+              </div>
+              <span className="text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                BillMate
+              </span>
             </div>
-          )}
-          <input
-            type="email"
-            placeholder="Email"
-            className="border border-[#6e3fe6] p-2 rounded-md"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="border border-[#6e3fe6] p-2 rounded-md"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button className="bg-violet-600 hover:bg-violet-700 text-white rounded-md py-2 font-semibold cursor-pointer">
-            Login
-          </button>
-          <p>
-            Not a member?{" "}
-            <Link
-              href={"/auth/signup"}
-              className="font-semibold text-violet-500 hover:text-violet-600"
-            >
-              Register Now
-            </Link>
+          </div>
+
+          {/* Form Card */}
+          <div className="bg-white rounded-3xl shadow-xl border-2 border-gray-100 p-8 space-y-6">
+            {/* Header */}
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
+              <p className="text-gray-600">
+                Sign in to continue splitting bills
+              </p>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex items-start gap-3">
+                <span className="text-lg">⚠️</span>
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleLogin} className="space-y-5">
+              {/* Email Input */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">
+                  Email address
+                </label>
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-gray-900 placeholder-gray-400"
+                  required
+                />
+              </div>
+
+              {/* Password Input */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-gray-900 placeholder-gray-400"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Remember & Forgot */}
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-600">Remember me</span>
+                </label>
+                <a
+                  href="#"
+                  className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                >
+                  Forgot password?
+                </a>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full group relative flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 disabled:shadow-none transition-all duration-300 overflow-hidden"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Signing in...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Sign in</span>
+                  </>
+                )}
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-gray-500 font-medium">
+                  New to BillMate?
+                </span>
+              </div>
+            </div>
+
+            {/* Sign Up Link */}
+            <div className="text-center">
+              <a
+                href="/auth/signup"
+                className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700 font-semibold rounded-xl transition-all duration-300"
+              >
+                Create an account
+              </a>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="pt-4 flex items-center justify-center gap-6 text-xs text-gray-500">
+              <div className="flex items-center gap-1">
+                <span>🔒</span>
+                <span>Secure</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span>⚡</span>
+                <span>Fast</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span>✓</span>
+                <span>Trusted</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Terms */}
+          <p className="text-center text-xs text-gray-500 mt-6">
+            By signing in, you agree to our{" "}
+            <a href="#" className="text-blue-600 hover:underline">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href="#" className="text-blue-600 hover:underline">
+              Privacy Policy
+            </a>
           </p>
-        </form>
-      </div>
-      {/*<form
-        onSubmit={handleLogin}
-        className="w-full max-w-md p-6 flex flex-col gap-4"
-      >
-        <Image
-          src="/logo.png"
-          alt="Logo"
-          width={150}
-          height={150}
-          className="mx-auto mb-4"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          className="border border-[#6e3fe6] p-2 rounded-md"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="border border-[#6e3fe6] p-2 rounded-md"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button className="cursor-pointer bg-[#7a46ff] text-white p-2 rounded-md">
-          Login
-        </button>
-      </form>*/}
-    </div>
-  );
-}
-
-function LeftVisual() {
-  return (
-    <div className="max-w-md flex flex-col justify-center gap-8">
-      <h2 className="text-3xl font-bold leading-tight">
-        Split bills
-        <br />
-        Track debts
-        <br />
-        <span className="flex items-center">
-          Processed by AI <Sparkles size={25} className="mx-3" />
-        </span>
-      </h2>
-      <div className="flex gap-10">
-        {/*receipt */}
-        <div className="bg-white/10 p-5 rounded-xl flex-1 space-y-3 min-w-[300px] space-y-3">
-          <p className="font-semibold text-white text-lg">Supermarket</p>
-          <p className="text-sm text-gray-200">12/12/2025</p>
-          <div className="border-t border-white/30 pt-2 space-y-1">
-            <div className="flex justify-between text-white text-sm">
-              <span>Apples</span>
-              <span>$5.00</span>
-            </div>
-            <div className="flex justify-between text-white text-sm">
-              <span>Bread</span>
-              <span>$3.50</span>
-            </div>
-            <div className="flex justify-between text-white text-sm">
-              <span>Milk</span>
-              <span>$2.80</span>
-            </div>
-          </div>
-          <div className="border-t border-white/50 pt-2 flex justify-between font-semibold text-white">
-            <span>Total</span>
-            <span>$11.30</span>
-          </div>
         </div>
-        {/*charts */}
-        <div className="bg-white/10 p-5 rounded-xl space-y-4 flex-1 space-y-3 min-w-[300px]">
-          <TrackBar label="Alex owes you" value={24.5} />
-          <TrackBar label="You owe Sam" value={18.2} />
-          <TrackBar label="Shared dinner" value={42.0} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TrackBar({ label, value }: { label: string; value: number }) {
-  const maxValue = 50;
-  const widthPercent = Math.min((value / maxValue) * 100, 100);
-  return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-sm opacity-90">
-        <span>{label}</span>
-        <span>${value.toFixed(2)}</span>
-      </div>
-      <div className="h-2 bg-white/20 rounded-full">
-        <div
-          className="h-2 bg-white rounded-full"
-          style={{ width: `${widthPercent}%` }}
-        />
       </div>
     </div>
   );
