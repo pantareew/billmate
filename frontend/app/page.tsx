@@ -323,7 +323,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           {/*header */}
           <div className="text-center mb-16">
-            <span className="inline-flex items-center gap-2 bg-gradient-to-br from-violet-700 via-pink-700 to-orange-700  px-6 py-3 rounded-full  shadow-sm text-sm text-white/90 font-bold uppercase tracking-wide">
+            <span className="inline-flex items-center gap-2 bg-gradient-to-br from-violet-700 via-pink-700 to-orange-700  px-6 py-3 rounded-full  shadow-sm text-sm text-white font-bold uppercase tracking-wide">
               Features
             </span>
           </div>
