@@ -108,14 +108,19 @@ export default function Home() {
       className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
     >
       {/*hero section */}
-      <main className="relative snap-start h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
-        {/*glowing circle */}
+      <main className="relative snap-start h-screen overflow-hidden bg-gradient-to-tr from-slate-900 via-indigo-900 to-purple-900">
+        {/*bg glow*/}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-indigo-400/20 rounded-full blur-[120px]" />
+          <div className="absolute bottom-1/3 right-1/3 w-[300px] h-[300px] bg-purple-400/20 rounded-full blur-[100px]" />
+        </div>
+        {/*mouse glow */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
             className="absolute w-96 h-96 bg-purple-500 rounded-full blur-3xl opacity-20"
             style={{
-              transform: `translate(${mousePosition.x - 192}px, ${
-                mousePosition.y - 192
+              transform: `translate(${mousePosition.x - 144}px, ${
+                mousePosition.y - 144
               }px)`,
             }}
           ></div>
@@ -136,7 +141,7 @@ export default function Home() {
                 />
               </div>
               <div className="space-y-4">
-                <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-tight">
+                <h2 className="text-5xl sm:text-6xl lg:text-6xl font-black leading-tight">
                   Say goodbye to
                 </h2>
                 <div className="h-32 sm:h-36">
@@ -229,7 +234,7 @@ export default function Home() {
                 {/*spending card*/}
                 <div className="absolute bottom-0 left-24 w-64 bg-white rounded-3xl shadow-2xl p-6 rotate-[4deg] hover:rotate-[2deg] transition-all duration-500 hover:scale-105 cursor-pointer">
                   <p className="text-sm text-gray-500 mb-2">This Month</p>
-                  <p className="text-4xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+                  <p className="text-4xl font-black bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent mb-4">
                     $1,450
                   </p>
                   <div className="space-y-2">
@@ -318,7 +323,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           {/*header */}
           <div className="text-center mb-16">
-            <span className="inline-flex items-center gap-2 bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900  px-6 py-3 rounded-full  shadow-sm text-sm text-white/90 font-bold uppercase tracking-wide">
+            <span className="inline-flex items-center gap-2 bg-gradient-to-br from-violet-700 via-pink-700 to-orange-700  px-6 py-3 rounded-full  shadow-sm text-sm text-white/90 font-bold uppercase tracking-wide">
               Features
             </span>
           </div>
