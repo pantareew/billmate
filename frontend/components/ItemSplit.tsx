@@ -13,6 +13,19 @@ type Item = {
   price: number;
 };
 
-export default function ItemSplit() {
-  //track which members are assigned to each item
+type ItemSplitProps = {
+  items: Item[];
+  members: Member[];
+  onComplete: (result: Record<string, number>) => void; //member, totals
+};
+
+export default function ItemSplit({
+  items,
+  members,
+  onComplete,
+}: ItemSplitProps) {
+  //track which members are assigned to which item
+  const [assign, setAssign] = useState<
+    Record<string, string[]> //itemId, members
+  >(() => Object.fromEntries(items.map((item) => [item.id, []]))); //{itemId: []}
 }
