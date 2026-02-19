@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import { apiFetch } from "@/lib/api";
+import ItemSplit from "@/components/ItemSplit";
 
 //group data type
 interface Group {
@@ -51,6 +52,12 @@ type SplitOption = {
   icon: string;
 };
 
+//dummy items
+const items = [
+  { id: "1", name: "Pizza", price: 20 },
+  { id: "2", name: "Soda", price: 5 },
+];
+
 export default function NewBillPage() {
   const { currentUser } = useUser();
   const router = useRouter();
@@ -71,6 +78,7 @@ export default function NewBillPage() {
   const [members, setMembers] = useState<User[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false); //saving data to db
+  const [totals, setTotals] = useState<Record<string, number>>({}); //track total amount owed from each member
   const splitOptions: SplitOption[] = [
     {
       id: "even",
@@ -185,7 +193,7 @@ export default function NewBillPage() {
         payer_id: currentUser.id,
         receipt: billData.receipt_url,
       };
-      console.log("📤 Sending payload:", payload);
+      console.log("Sending payload:", payload);
       const bill = await apiFetch<any>("/bills/create", {
         method: "POST",
         headers: {
@@ -193,7 +201,7 @@ export default function NewBillPage() {
         },
         body: JSON.stringify(payload),
       });
-      console.log("✅ Bill created:", bill);
+      console.log("Bill created:", bill);
       await apiFetch("/bills/split", {
         method: "POST",
         headers: {
@@ -206,8 +214,7 @@ export default function NewBillPage() {
       });
       router.push("/dashboard");
     } catch (err: any) {
-      console.error("❌ Raw error:", err);
-      console.error("❌ Error message:", err.message);
+      console.error("error:", err.message);
     } finally {
       setSubmitting(false);
     }
@@ -330,7 +337,7 @@ export default function NewBillPage() {
                       value={billData.title}
                       onChange={(e) =>
                         setBillData(
-                          (item) => item && { ...item, title: e.target.value }
+                          (item) => item && { ...item, title: e.target.value },
                         )
                       }
                     />
@@ -358,7 +365,7 @@ export default function NewBillPage() {
                             item && {
                               ...item,
                               total: Number(e.target.value),
-                            }
+                            },
                         )
                       }
                     />
@@ -530,7 +537,7 @@ export default function NewBillPage() {
                           setSelectedMembers((prev) =>
                             checked
                               ? prev.filter((id) => id !== m.id)
-                              : [...prev, m.id]
+                              : [...prev, m.id],
                           )
                         }
                         className={`group relative px-5 py-2 rounded-2xl border-2 font-medium transition-all duration-300 flex items-center gap-3 ${
@@ -569,7 +576,15 @@ export default function NewBillPage() {
             )}
           </div>
         )}
-        {/*edit items */}
+        {/*split by items */}
+        {step === "itemAssign" && billData && (
+          <ItemSplit
+            items={items}
+            members={members}
+            onComplete={(result) => setTotals(result)} //set totals for each member with calculated result from ItemSplit
+          />
+        )}
+        {/*
         {step === "itemAssign" && billData && (
           <div className="space-y-3">
             {billData.items.map((item, i) => (
@@ -610,7 +625,7 @@ export default function NewBillPage() {
             </button>
           </div>
         )}
-
+*/}
         {/*review*/}
         {step === "review" && billData && (
           <div className="space-y-3 mt-8 mb-14">
