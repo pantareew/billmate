@@ -512,7 +512,6 @@ export default function NewBillPage() {
                 })}
               </div>
             </div>
-
             {/*members selection*/}
             {selectedGroup && members.length > 0 && (
               <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 px-8 py-6 space-y-4">
@@ -553,26 +552,38 @@ export default function NewBillPage() {
                 </div>
               </div>
             )}
-            {/*continue btn */}
+            {/*action buttons */}
             {selectedGroup && selectedMembers.length > 0 && (
-              <button
-                className="w-full bg-gradient-to-b from-blue-500 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-2xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 flex items-center justify-center gap-3 group"
-                onClick={() => {
-                  if (splitType === "even") {
-                    setStep("review");
-                  }
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setStep("splitType")}
+                  className="flex-1 bg-white border-2 border-gray-200 text-gray-700 py-3.5 rounded-2xl font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 flex items-center justify-center gap-2 shadow-sm hover:shadow-md group"
+                >
+                  <ArrowLeft
+                    size={20}
+                    className="group-hover:-translate-x-1 transition-transform duration-300"
+                  />
+                  Back
+                </button>
+                <button
+                  className="flex-1 bg-gradient-to-b from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-pink-500/30 flex items-center justify-center gap-3 group"
+                  onClick={() => {
+                    if (splitType === "even") {
+                      setStep("review");
+                    }
 
-                  if (splitType === "item") {
-                    setStep("itemAssign");
-                  }
-                }}
-              >
-                Continue
-                <ArrowRight
-                  size={20}
-                  className="group-hover:translate-x-1 transition-transform duration-300"
-                />
-              </button>
+                    if (splitType === "item") {
+                      setStep("itemAssign");
+                    }
+                  }}
+                >
+                  Continue
+                  <ArrowRight
+                    size={20}
+                    className="group-hover:translate-x-1 transition-transform duration-300"
+                  />
+                </button>
+              </div>
             )}
           </div>
         )}
@@ -581,51 +592,13 @@ export default function NewBillPage() {
           <ItemSplit
             items={items}
             members={members}
-            onComplete={(result) => setTotals(result)} //set totals for each member with calculated result from ItemSplit
+            onComplete={(result) => {
+              setTotals(result); //set totals for each member with calculated result from ItemSplit
+              setStep("review");
+            }}
+            onBack={() => setStep("group")}
           />
         )}
-        {/*
-        {step === "itemAssign" && billData && (
-          <div className="space-y-3">
-            {billData.items.map((item, i) => (
-              <div key={i} className="flex gap-2">
-                <input
-                  className="border p-1 flex-1"
-                  value={item.name}
-                  onChange={(e) => {
-                    const copy = [...billData.items];
-                    copy[i].name = e.target.value;
-
-                    setBillData({
-                      ...billData,
-                      items: copy,
-                    });
-                  }}
-                />
-
-                <input
-                  className="border p-1 w-24"
-                  type="number"
-                  value={item.price}
-                  onChange={(e) => {
-                    const copy = [...billData.items];
-                    copy[i].price = Number(e.target.value);
-
-                    setBillData({
-                      ...billData,
-                      items: copy,
-                    });
-                  }}
-                />
-              </div>
-            ))}
-
-            <button className="btn-primary" onClick={() => setStep("review")}>
-              Continue
-            </button>
-          </div>
-        )}
-*/}
         {/*review*/}
         {step === "review" && billData && (
           <div className="space-y-3 mt-8 mb-14">
@@ -716,7 +689,7 @@ export default function NewBillPage() {
                       ))}
                   </div>
                   {/*action buttons */}
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 mt-4 mb-2">
                     {/*back btn */}
                     <button
                       onClick={() => setStep("group")}

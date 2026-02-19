@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { useMemo, useState } from "react";
 
 type Member = {
@@ -18,12 +18,14 @@ type ItemSplitProps = {
   items: Item[];
   members: Member[];
   onComplete: (result: Record<string, number>) => void; //passing {member:total} to parent
+  onBack: () => void;
 };
 
 export default function ItemSplit({
   items,
   members,
   onComplete,
+  onBack,
 }: ItemSplitProps) {
   //state var to track which members are assigned to an item
   const [assign, setAssign] = useState<
@@ -152,39 +154,69 @@ export default function ItemSplit({
             );
           })}
         </div>
-      </div>
-      {/*summary */}
-      <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border-2 border-gray-100 overflow-hidden">
-        <button
-          onClick={() => setExpandSum(!expandSum)}
-          className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
-        >
-          <div className="flex items-center gap-4">
-            <div className="text-left">
-              <h3 className="text-xl font-bold text-gray-900">Split Summary</h3>
-              <p className="text-sm text-gray-500">Per person breakdown</p>
-            </div>
-          </div>
 
-          <h3 className="text-lg font-bold text-gray-900">Split Summary</h3>
-          {members.map((member) => (
-            <div key={member.id} className="flex justify-between text-gray-700">
-              <span>{member.name}</span>
-              <span className="font-semibold">
-                ${totals[member.id].toFixed(2)}
-              </span>
+        {/*summary */}
+        <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border-2 border-gray-100 overflow-hidden">
+          <button
+            onClick={() => setExpandSum(!expandSum)}
+            className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <div className="text-left">
+                <h3 className="text-xl font-bold text-gray-900">
+                  Split Summary
+                </h3>
+                <p className="text-sm text-gray-500">Per person breakdown</p>
+              </div>
             </div>
-          ))}
-        </button>
-      </div>
-      {/*confirm btn */}
-      <div className="text-center">
-        <button
-          onClick={handleConfirm}
-          className="px-8 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg hover:scale-105 transition-all"
-        >
-          Confirm Split
-        </button>
+            {expandSum ? (
+              <ChevronUp className="text-gray-400" size={24} />
+            ) : (
+              <ChevronDown className="text-gray-400" size={24} />
+            )}
+          </button>
+          {expandSum && (
+            <div className="border-t-2 border-gray-100 p-6 space-y-4">
+              {members.map((member) => (
+                <div key={member.id} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    {/*member name */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-md">
+                        {getMemberInitial(member.name)}
+                      </div>
+                      <span className="font-semibold text-gray-900">
+                        {member.name}
+                      </span>
+                    </div>
+
+                    {/*total */}
+                    <div className="text-xl font-black text-gray-900">
+                      ${totals[member.id].toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        {/*buttons */}
+        <div className="flex gap-4 mb-10">
+          {/* back */}
+          <button
+            onClick={onBack}
+            className="w-1/2 py-4 rounded-full font-bold text-lg bg-gray-200 hover:bg-gray-300 text-gray-800"
+          >
+            Back
+          </button>
+          {/* confirm */}
+          <button
+            onClick={handleConfirm}
+            className="w-1/2 py-4  rounded-full font-bold text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-xl hover:shadow-purple-500/40"
+          >
+            Confirm Split
+          </button>
+        </div>
       </div>
     </div>
   );
