@@ -181,12 +181,12 @@ async def upload_receipt(bill_id: str,
         print("Error uploading receipt:", e)
         raise HTTPException(status_code=500, detail=str(e))
 
-#upload main bill
+#upload main bill to storage
 @router.post("/upload")
 def upload_main_bill(
     receipt: UploadFile = File(...), #receipt file
 ):
-    #get file externsion
+    #get file extension
     file__ext = receipt.filename.split(".")[-1]
     #create unique filename
     file_name = f"{uuid.uuid4()}.{file__ext}"
@@ -198,23 +198,22 @@ def upload_main_bill(
     supabase.storage.from_("receipts").upload(file_path, contents, {"content-type": receipt.content_type})
     #get public url
     public_url = supabase.storage.from_("receipts").get_public_url(file_path)
-    #AI extraction
-    ai_result = extract_receipt(public_url)
-    #get total amount from ai result
-    import re #import regex
-    match = re.search(r"\$?(\d+(\.\d{2})?)", ai_result) #get string that match with amount pattern
-    #convert matched str amount to num
-    total_amount = float(match.group(1)) if match else 0
-    #title pattern
-    title_pattern = r'(?i)merchant\s*name\s*(?:is|:)?\s*["“]?(.+?)(?:,|\s+and\b|\.|\n|$)'
-    #get only merchant name from ai result
-    title_match = re.search(title_pattern, ai_result)
-    title = title_match.group(1).strip('" ').rstrip('.,') if title_match else "Unknown"
+    #call ai to extract receipt
+    ai_raw = extract_receipt(public_url)
+    #import json
+    import json
+    #convert ai result as actual json
+    ai_data = json.loads(ai_raw)
+    #read fields from json
+    title = ai_data.get("merchant") or "Unknown" #merchant name
+    total_amount = ai_data.get("total") or 0 #total amount
+    items = ai_data.get("items") or [] #items
     return {
         "receipt_url": public_url,
-        "ai_result":ai_result,
+        "ai_result":ai_data,
         "total_amount":total_amount,
-        "title": title
+        "title": title,
+        "items":items
     }
 
 #create bill after user confirms
