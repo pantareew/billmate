@@ -17,7 +17,6 @@ Rules:
 - Never hallucinate items
 - Ignore address, phone, cashier, payment method
 - Prices must be numbers only (no currency symbols)
-- If quantity > 1, multiply price into a single item
 - id incremental string starting from "1"
 Schema:
 {

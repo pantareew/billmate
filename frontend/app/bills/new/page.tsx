@@ -29,6 +29,7 @@ interface User {
 
 //item type in a bill
 interface Item {
+  id: string;
   name: string;
   price: number;
 }
@@ -51,12 +52,6 @@ type SplitOption = {
   borderColor: string;
   icon: string;
 };
-
-//dummy items
-const items = [
-  { id: "1", name: "Pizza", price: 20 },
-  { id: "2", name: "Soda", price: 5 },
-];
 
 export default function NewBillPage() {
   const { currentUser } = useUser();
@@ -104,7 +99,14 @@ export default function NewBillPage() {
     selectedMembers.length > 0 && billData
       ? Number((billData.total / selectedMembers.length).toFixed(2))
       : 0;
-
+  //handle back button from review section
+  const handleBackReview = () => {
+    if (splitType === "item") {
+      setStep("itemAssign");
+    } else {
+      setStep("splitType");
+    }
+  };
   //upload receipt
   useEffect(() => {
     if (!file || !currentUser || uploaded) return;
@@ -590,7 +592,7 @@ export default function NewBillPage() {
         {/*split by items */}
         {step === "itemAssign" && billData && (
           <ItemSplit
-            items={items}
+            items={billData.items}
             members={members}
             onComplete={(result) => {
               setTotals(result); //set totals for each member with calculated result from ItemSplit
@@ -681,7 +683,8 @@ export default function NewBillPage() {
                           {/*amount */}
                           <div className="text-right">
                             <p className="text-xl font-bold text-blue-600">
-                              $ {perPersonAmount}
+                              {/*total amount to pay for each person */}$
+                              {totals[member.id].toFixed(2) ?? 0.0}
                             </p>
                             <p className="text-xs text-gray-500">to pay</p>
                           </div>
@@ -692,7 +695,7 @@ export default function NewBillPage() {
                   <div className="flex gap-4 mt-4 mb-2">
                     {/*back btn */}
                     <button
-                      onClick={() => setStep("group")}
+                      onClick={handleBackReview}
                       className="flex-1 bg-white border-2 border-gray-200 text-gray-700 py-4 rounded-2xl font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 flex items-center justify-center gap-2 shadow-sm hover:shadow-md group"
                     >
                       <ArrowLeft
