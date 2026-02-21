@@ -97,11 +97,11 @@ export default function ItemSplit({
                   <div className="flex items-start justify-between">
                     {/*item name */}
                     <div>
-                      <h3 className="text-2xl font-bold text-gray-900">
+                      <h3 className="text-xl font-bold text-gray-900">
                         {item.name}
                       </h3>
                       {isAssigned && (
-                        <p className="text-sm text-gray-500">
+                        <p className="text-xs text-gray-500">
                           ${sharePerPerson.toFixed(2)} per person ×{" "}
                           {assignedMembers.length}
                         </p>
@@ -109,7 +109,7 @@ export default function ItemSplit({
                     </div>
                     {/*item price */}
                     <div className="text-right">
-                      <p className="text-2xl font-black text-gray-900">
+                      <p className="text-xl font-black text-gray-900">
                         ${item.price.toFixed(2)}
                       </p>
                       {!isAssigned && (
@@ -136,7 +136,7 @@ export default function ItemSplit({
                       }`}
                         >
                           <div
-                            className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                               selected
                                 ? "bg-white/20 text-white"
                                 : `bg-gradient-to-br from-orange-500 to-pink-600 text-white`

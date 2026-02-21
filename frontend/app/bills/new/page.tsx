@@ -589,10 +589,9 @@ export default function NewBillPage() {
         {/*even split */}
         {step === "evenAssign" && billData && (
           <EvenSplit
-            members={members}
             selectedMembers={selectedMembers}
             totalAmount={billData.total}
-            onBack={() => setStep("splitType")}
+            onBack={() => setStep("group")}
             onComplete={(result) => {
               setTotals(result);
               setStep("review");
