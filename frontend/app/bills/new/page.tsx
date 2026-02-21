@@ -14,6 +14,7 @@ import {
 import { useUser } from "@/context/UserContext";
 import { apiFetch } from "@/lib/api";
 import ItemSplit from "@/components/ItemSplit";
+import EvenSplit from "@/components/EvenSplit";
 
 //group data type
 interface Group {
@@ -40,6 +41,7 @@ type Step =
   | "summary"
   | "splitType"
   | "group"
+  | "evenAssign"
   | "itemAssign"
   | "review";
 
@@ -94,11 +96,6 @@ export default function NewBillPage() {
       icon: "🧾",
     },
   ];
-  //even split calculation
-  const perPersonAmount =
-    selectedMembers.length > 0 && billData
-      ? Number((billData.total / selectedMembers.length).toFixed(2))
-      : 0;
   //handle back button from review section
   const handleBackReview = () => {
     if (splitType === "item") {
@@ -571,7 +568,7 @@ export default function NewBillPage() {
                   className="flex-1 bg-gradient-to-b from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-pink-500/30 flex items-center justify-center gap-3 group"
                   onClick={() => {
                     if (splitType === "even") {
-                      setStep("review");
+                      setStep("evenAssign");
                     }
 
                     if (splitType === "item") {
@@ -589,6 +586,20 @@ export default function NewBillPage() {
             )}
           </div>
         )}
+        {/*even split */}
+        {step === "evenAssign" && billData && (
+          <EvenSplit
+            members={members}
+            selectedMembers={selectedMembers}
+            totalAmount={billData.total}
+            onBack={() => setStep("splitType")}
+            onComplete={(result) => {
+              setTotals(result);
+              setStep("review");
+            }}
+          />
+        )}
+
         {/*split by items */}
         {step === "itemAssign" && billData && (
           <ItemSplit
