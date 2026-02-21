@@ -428,7 +428,7 @@ export default function NewBillPage() {
 
                         {/*arrow */}
                         <div className="flex-shrink-0">
-                          <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gradient-to-r group-hover:from-blue-500 group-hover:to-indigo-600 transition-all duration-300">
+                          <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gradient-to-br group-hover:from-emerald-500 group-hover:to-indigo-600 transition-all duration-300">
                             <ArrowRight
                               className="text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all duration-300"
                               size={20}
@@ -541,7 +541,7 @@ export default function NewBillPage() {
                         }
                         className={`group relative px-5 py-2 rounded-2xl border-2 font-medium transition-all duration-300 flex items-center gap-3 ${
                           checked
-                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-600 shadow-lg shadow-blue-500/30"
+                            ? "bg-gradient-to-br from-cyan-500 to-indigo-600 text-white border-blue-400 shadow-lg shadow-blue-500/30"
                             : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:shadow-md"
                         }`}
                       >
