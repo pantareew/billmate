@@ -208,7 +208,8 @@ export default function NewBillPage() {
         },
         body: JSON.stringify({
           bill_id: bill.id,
-          shared_users: selectedMembers.filter((id) => id !== currentUser?.id), //exclude payer to be added to bill_shares
+          shared_users: selectedMembers,
+          totals: totals,
         }),
       });
       router.push("/dashboard");

@@ -31,7 +31,7 @@ export default function ItemSplit({
   const [assign, setAssign] = useState<
     Record<string, string[]> //itemId, members
   >(() => Object.fromEntries(items.map((item) => [item.id, []]))); //{itemId: []}
-  const [expandSum, setExpandSum] = useState(true);
+  const [expandSum, setExpandSum] = useState(false);
   //toggle assign when click a member on an item
   const toggleAssign = (itemId: string, memberId: string) => {
     //update assign var

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from uuid import UUID
-from typing import List
+from typing import List, Dict
 
 class CreateGroup(BaseModel):
     name: str
@@ -23,4 +23,4 @@ class ApproveRequest(BaseModel): #return from payer's approval
 
 class SplitBill(BaseModel):
     bill_id: str
-    shared_users: List[str]
+    totals: Dict[str, float]

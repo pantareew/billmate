@@ -246,6 +246,7 @@ def create_bill(data: CreateBill):
 def split_bill(payload: SplitBill):
     bill_id = payload.bill_id
     share_users = payload.shared_users
+    totals = payload.totals
     #get bill from db
     bill_res = supabase.table("bills").select("*").eq("id", bill_id).single().execute()
     if not bill_res.data:
