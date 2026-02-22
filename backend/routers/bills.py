@@ -245,47 +245,50 @@ def create_bill(data: CreateBill):
 @router.post("/split")
 def split_bill(payload: SplitBill):
     bill_id = payload.bill_id
-    share_users = payload.shared_users
     totals = payload.totals
+    if not totals:
+        raise HTTPException(400, "Totals cannot be empty")
     #get bill from db
     bill_res = supabase.table("bills").select("*").eq("id", bill_id).single().execute()
     if not bill_res.data:
         raise HTTPException(404, "Bill not found")
     bill = bill_res.data
-
-    #check if bill already split
-    existing = supabase.table("bill_shares").select("id").eq("bill_id", bill_id).execute()
-    if existing.data:
-        raise HTTPException(400, "Bill already split")
     #get data from bill
-    total_amount = bill["total_amount"]
+    payer_id = bill["payer_id"]
+    receipt = bill["receipt"]
     title = bill["title"]
-    #shares array
-    shares = []
-    #calculate split
-    split_amount = total_amount/(len(share_users)+1) #plus payer
-    #dict for each share_user data
-    for uid in share_users:
-            shares.append({
+    bill_total = float(bill["total_amount"])
+    #total amount from frontend
+    total_frontend = sum(totals.values())
+    #check if total saved in db match with total from frontend request
+    if round(total_frontend, 2) != round(bill_total, 2):
+        raise HTTPException(400, "Split amounts do not match bill total")
+    #dict for each share user data
+    shares = [
+        {
                 "bill_id": bill_id,
-                "user_id": uid,
-                "amount_owed": split_amount,
-                "paid": "unpaid",
-                "receipt": None,
-                "paid_at": None
-            })
+                "user_id": user_id,
+                "amount_owed": amount,
+                "paid": "paid" if user_id == payer_id else "unpaid",
+                "receipt": receipt if user_id == payer_id else None,
+                "paid_at": datetime.now(timezone.utc).isoformat() if user_id == payer_id else None
+        }
+        for user_id, amount in totals.items()
+    ]
     #insert shares into db
     supabase.table("bill_shares").insert(shares).execute()
     #notify users about new bill
     notifications = [
         {
-            "user_id": uid,
+            "user_id": user_id,
             "bill_id": bill_id,
             "type": "new_bill",
             "message": f"You have been added to a new bill: {title}"
         }
-        for uid in share_users
+        for user_id in totals.keys() #users in totals keys
+        if user_id != payer_id #exclude payer
     ]
-    supabase.table("notifications").insert(notifications).execute()
-    
-    return {"amount_owed":split_amount}
+    if notifications:
+        supabase.table("notifications").insert(notifications).execute()
+
+    return {"message": "Split saved successfully"}
