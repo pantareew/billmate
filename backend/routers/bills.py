@@ -253,6 +253,10 @@ def split_bill(payload: SplitBill):
     if not bill_res.data:
         raise HTTPException(404, "Bill not found")
     bill = bill_res.data
+    #check if bill already split
+    existing = supabase.table("bill_shares").select("id").eq("bill_id", bill_id).execute()
+    if existing.data:
+        raise HTTPException(400, "Bill already split")
     #get data from bill
     payer_id = bill["payer_id"]
     receipt = bill["receipt"]
