@@ -52,7 +52,7 @@ def get_my_bills(user_id: str):
 
     #bills that user owes
     owed_raw = supabase.table("bill_shares").select("bill_id, paid, amount_owed")\
-        .eq("user_id", user_id).execute().data or []
+        .eq("user_id", user_id).neq("paid", "paid").execute().data or []
 
     owed_bills = []
     owed_bill_ids = [item["bill_id"] for item in owed_raw]
