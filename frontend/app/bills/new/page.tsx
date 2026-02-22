@@ -707,7 +707,14 @@ export default function NewBillPage() {
                     {/*back btn */}
                     <button
                       onClick={handleBackReview}
-                      className="flex-1 bg-white border-2 border-gray-200 text-gray-700 py-4 rounded-2xl font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 flex items-center justify-center gap-2 shadow-sm hover:shadow-md group"
+                      disabled={submitting}
+                      className={`flex-1 py-4 rounded-2xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-sm hover:shadow-md group
+                      ${
+                        submitting
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300"
+                      }
+                    `}
                     >
                       <ArrowLeft
                         size={20}
@@ -718,9 +725,20 @@ export default function NewBillPage() {
                     {/*submit btn */}
                     <button
                       onClick={handleSubmit}
-                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl "
+                      disabled={submitting}
+                      className={`flex-1 py-4 rounded-2xl font-semibold shadow-lg transition-all duration-300 flex items-center justify-center gap-2 group
+                        ${
+                          submitting
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                        }
+                      `}
                     >
                       Confirm & Create Bill
+                      <ArrowRight
+                        size={20}
+                        className="group-hover:translate-x-1 transition-transform duration-300"
+                      />
                     </button>
                   </div>
                 </div>

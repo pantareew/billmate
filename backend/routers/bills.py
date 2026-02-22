@@ -257,12 +257,12 @@ def split_bill(payload: SplitBill):
     payer_id = bill["payer_id"]
     receipt = bill["receipt"]
     title = bill["title"]
-    bill_total = float(bill["total_amount"])
+    #bill_total = float(bill["total_amount"])
     #total amount from frontend
-    total_frontend = sum(totals.values())
+    #total_frontend = sum(totals.values())
     #check if total saved in db match with total from frontend request
-    if round(total_frontend, 2) != round(bill_total, 2):
-        raise HTTPException(400, "Split amounts do not match bill total")
+    #if round(total_frontend, 2) != round(bill_total, 2):
+        #raise HTTPException(400, "Split amounts do not match bill total")
     #dict for each share user data
     shares = [
         {
